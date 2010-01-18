@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2009-12-16 14:17:47 marek>
+# Time-stamp: <2010-01-18 20:05:14 marek>
 
 # Description:
 
@@ -10,16 +10,17 @@ import numpy as np
 from collections import namedtuple
 
 import os
-current_dir = os.path.dirname(__file__)
-os.chdir( current_dir )
+import platform
+lib_dir = os.path.dirname(__file__)
 from neuron import h
-# TODO: chdir to original dir
+h.nrn_load_dll(lib_dir + '/' + platform.machine() + '/.libs/libnrnmech.so')
+
 
 EndbulbPars = namedtuple('EndbulbPars', ['e', 'tau_1', 'tau_rec',
                                          'tau_facil', 'U',
                                          'threshold', 'delay', 'weight'])
 
-InputSynapse = namedtuple('InputSynapse', 'syn con spikes')
+InputSynapse = namedtuple('InputSynapse', 'syn con')
 
 
 class GBC_Point(object):
@@ -28,6 +29,7 @@ class GBC_Point(object):
 
         # ANF synapses
         self.anf_synapse_list = []
+        self.anf_trains = []
 
 
         # Soma: parameters from (Rothman & Manis 2003)
@@ -39,9 +41,9 @@ class GBC_Point(object):
         self.soma.L = Lstd
         self.soma.Ra = 150.0
 
-        if na_type = 'rothman93':
+        if na_type == 'rothman93':
             self.soma.insert('na_rothman93')
-        elif na_type = 'na_orig':
+        elif na_type == 'orig':
             self.soma.insert('na')
         self.soma.insert('klt')
         self.soma.insert('kht')
@@ -55,9 +57,9 @@ class GBC_Point(object):
         self.soma.ena = 50
 
         for seg in self.soma:
-            if na_type = 'rothman93':
+            if na_type == 'rothman93':
                 seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
-            elif na_type = 'na_orig':
+            elif na_type == 'orig':
                 seg.na.gnabar = self._Tf(q10) * 0.35
             seg.klt.gkltbar = self._Tf(q10) * self._nstomho(200, soma_area)
             seg.kht.gkhtbar = self._Tf(q10) * self._nstomho(150, soma_area)
@@ -85,7 +87,7 @@ class GBC_Point(object):
 
 
 
-    def set_anf_pars(self, pars):
+    def set_endbulb_pars(self, pars):
         """
         pars: synaptic parameters
         """
@@ -104,13 +106,18 @@ class GBC_Point(object):
             syn = h.tmgsyn(self.soma(0.5))
             con = h.NetCon(None, syn)
 
-            self.anf_synapse_list.append( InputSynapse(syn, con, train) )
+            self.anf_synapse_list.append( InputSynapse(syn, con) )
+            self.anf_trains.append(train)
+
+    def clear_synapse_list(self):
+        self.anf_synapse_list = []
+        self.anf_trains = []
 
 
     def init(self):
-        for anf in self.anf_synapse_list:
-            for sp in anf.spikes:
-                anf.con.event(float(sp))
+        for train,synapse in zip(self.anf_trains, self.anf_synapse_list):
+            for sp in train:
+                synapse.con.event(float(sp))
 
 
 
