@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-01-18 20:05:14 marek>
+# Time-stamp: <2010-01-20 22:01:49 marek>
 
 # Description:
 
@@ -11,16 +11,17 @@ from collections import namedtuple
 
 import os
 import platform
-lib_dir = os.path.dirname(__file__)
 from neuron import h
+
+lib_dir = os.path.dirname(__file__)
 h.nrn_load_dll(lib_dir + '/' + platform.machine() + '/.libs/libnrnmech.so')
 
 
-EndbulbPars = namedtuple('EndbulbPars', ['e', 'tau_1', 'tau_rec',
-                                         'tau_facil', 'U',
+EndbulbPars = namedtuple('EndbulbPars', ['e', 'tau', 'tau_fast',
+                                         'tau_slow', 'U', 'k',
                                          'threshold', 'delay', 'weight'])
 
-InputSynapse = namedtuple('InputSynapse', 'syn con')
+synapse_type = [('syn', object), ('con', object), ('spikes', np.ndarray)]
 
 
 class GBC_Point(object):
@@ -28,8 +29,7 @@ class GBC_Point(object):
 
 
         # ANF synapses
-        self.anf_synapse_list = []
-        self.anf_trains = []
+        self.anf_synapse_list = np.array([], dtype=synapse_type)
 
 
         # Soma: parameters from (Rothman & Manis 2003)
@@ -87,43 +87,67 @@ class GBC_Point(object):
 
 
 
-    def set_endbulb_pars(self, pars):
+    def set_endbulb_pars(self, pars, idx=-1):
         """
         pars: synaptic parameters
         """
-        for anf in self.anf_synapse_list:
-            anf.syn.e = pars.e
-            anf.syn.tau_1 = pars.tau_1
-            anf.syn.tau_rec = pars.tau_rec
-            anf.syn.tau_facil = pars.tau_facil
-            anf.syn.U = pars.U
+        anf = self.anf_synapse_list[idx]
 
-            anf.con.weight[0] = pars.weight
+        anf['syn'].e = pars.e
+        anf['syn'].tau = pars.tau
+        anf['syn'].tau_fast = pars.tau_fast
+        anf['syn'].tau_slow = pars.tau_slow
+        anf['syn'].U = pars.U
+        anf['syn'].k = pars.k
+
+        anf['con'].weight[0] = pars.weight
 
 
-    def load_anf_trains(self, trains):
-        for train in trains:
-            syn = h.tmgsyn(self.soma(0.5))
-            con = h.NetCon(None, syn)
+    def load_anf_train(self, train, pars):
+        syn = h.Endbulb(self.soma(0.5))
+        con = h.NetCon(None, syn)
 
-            self.anf_synapse_list.append( InputSynapse(syn, con) )
-            self.anf_trains.append(train)
+        tmp = self.anf_synapse_list.tolist()
+        tmp.append((syn, con, train))
+        self.anf_synapse_list = np.array(tmp, dtype=synapse_type)
+        self.set_endbulb_pars(pars)
 
     def clear_synapse_list(self):
-        self.anf_synapse_list = []
-        self.anf_trains = []
+        self.anf_synapse_list = np.array([], dtype=synapse_type)
 
 
     def init(self):
-        for train,synapse in zip(self.anf_trains, self.anf_synapse_list):
-            for sp in train:
-                synapse.con.event(float(sp))
-
+        for synapse in self.anf_synapse_list:
+            for sp in synapse['spikes']:
+                synapse['con'].event(float(sp))
 
 
 
 def main():
-    pass
+    import matplotlib.pyplot as plt
+    import neuron
+    import thorns.waves as wv
+
+    h.celsius = 37
+
+    gbc = GBC_Point()
+    pars = EndbulbPars(e=0, tau=0.2, tau_fast=15, tau_slow=1000,
+                       U=0.5, k=0.5, threshold=0, delay=0.5,
+                       weight=0.09)
+    train = [8, 12]
+
+    gbc.load_anf_train(train, pars)
+
+    v = h.Vector()
+    v.record(gbc.soma(0.5)._ref_v)
+
+    neuron.init()
+    gbc.init()
+    neuron.run(20)
+
+    plt.plot(wv.t(1/h.dt,v), v)
+    plt.show()
+
 
 if __name__ == "__main__":
     main()

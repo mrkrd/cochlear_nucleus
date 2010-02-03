@@ -1,5 +1,5 @@
 COMMENT
-Time-stamp: <2010-01-18 20:03:24 marek>
+Time-stamp: <2010-02-03 11:59:40 marek>
 Author: Marek Rudnicki
 
 Description:
@@ -13,7 +13,7 @@ ENDCOMMENT
 
 
 NEURON {
-    POINT_PROCESS Endbulb
+    POINT_PROCESS Recov2Exp
     RANGE tau, e, i
     RANGE k, tau_fast, tau_slow, U
     NONSPECIFIC_CURRENT i
@@ -37,8 +37,8 @@ PARAMETER {
 ASSIGNED {
     v (mV)
     i (nA)
-    GF (umho)
-    GS (umho)
+    Gfast (umho)
+    Gslow (umho)
 }
 
 STATE {
@@ -61,16 +61,16 @@ DERIVATIVE state {
 NET_RECEIVE(weight (umho), G (umho), t0 (ms)) {
     INITIAL {
 	t0 = 0
-	G = weight * U / (1-U)
+	G = weight / (1-U)
     }
 
-    GF = G*(1-U)*exp(-(t-t0)/tau_fast) + weight*U*(1-exp(-(t-t0)/tau_fast))
-    GS = G*(1-U)*exp(-(t-t0)/tau_slow) + weight*U*(1-exp(-(t-t0)/tau_slow))
-    G = k*GF + (1-k)*GS
+    Gfast = G*(1-U)*exp(-(t-t0)/tau_fast) + weight*(1-exp(-(t-t0)/tau_fast))
+    Gslow = G*(1-U)*exp(-(t-t0)/tau_slow) + weight*(1-exp(-(t-t0)/tau_slow))
+    G = k*Gfast + (1-k)*Gslow
 
     state_discontinuity(g, g + G)
 
-    : printf("%5.1f\t%8.5g\t%g\n", t, G, g)
-
     t0 = t
+
+    printf("%5.1f\t%8.5g\t%g\n", t, G, g)
 }
