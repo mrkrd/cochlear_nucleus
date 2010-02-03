@@ -1,5 +1,5 @@
 COMMENT
-Time-stamp: <2010-02-03 11:59:40 marek>
+Time-stamp: <2010-02-03 14:15:35 marek>
 Author: Marek Rudnicki
 
 Description:
@@ -72,5 +72,5 @@ NET_RECEIVE(weight (umho), G (umho), t0 (ms)) {
 
     t0 = t
 
-    printf("%5.1f\t%8.5g\t%g\n", t, G, g)
+    : printf("%5.1f\t%8.5g\t%g\n", t, G, g)
 }

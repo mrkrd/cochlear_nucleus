@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-01-20 22:01:49 marek>
+# Time-stamp: <2010-02-03 14:14:45 marek>
 
 # Description:
 
@@ -104,7 +104,7 @@ class GBC_Point(object):
 
 
     def load_anf_train(self, train, pars):
-        syn = h.Endbulb(self.soma(0.5))
+        syn = h.Recov2Exp(self.soma(0.5))
         con = h.NetCon(None, syn)
 
         tmp = self.anf_synapse_list.tolist()
@@ -133,7 +133,7 @@ def main():
     gbc = GBC_Point()
     pars = EndbulbPars(e=0, tau=0.2, tau_fast=15, tau_slow=1000,
                        U=0.5, k=0.5, threshold=0, delay=0.5,
-                       weight=0.09)
+                       weight=0.04)
     train = [8, 12]
 
     gbc.load_anf_train(train, pars)
