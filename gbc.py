@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-02-26 00:19:43 marek>
+# Time-stamp: <2010-02-26 14:34:38 marek>
 
 # Description:
 
@@ -11,14 +11,10 @@ import os
 
 import neuron
 from neuron import h
-from neuron import nrn
-
-# lib_dir = os.path.dirname(__file__)
-# neuron.load_mechanisms(lib_dir)
 
 
 class GBC_Point(object):
-    def __init__(self, anf_num, cf, endbulb_type=h.ExpSyn, threshold=-20):
+    def __init__(self, anf_num, cf, synapse=h.ExpSyn, threshold=-20):
 
 
         # Soma parameters from (Rothman & Manis 2003)
@@ -50,7 +46,7 @@ class GBC_Point(object):
 
 
         # Seting up synapses
-        self.make_endbulbs(anf_num, endbulb_type)
+        self.make_endbulbs(anf_num, synapse)
         self.cf = float(cf)
 
 
@@ -76,9 +72,9 @@ class GBC_Point(object):
     _endbulb_type  = [('typ', 'S3'),
                       ('syn', object),
                       ('con', object),
-                      ('spk', object)]
+                      ('spikes', object)]
 
-    def make_endbulbs(self, anf_num, endbulb_type=h.ExpSyn, endbulb_pars=None):
+    def make_endbulbs(self, anf_num, synapse=h.ExpSyn, endbulb_pars=None):
         """ anf_num: (hsr, msr, lsr) """
         assert isinstance(anf_num, tuple)
 
@@ -91,7 +87,7 @@ class GBC_Point(object):
         endbulbs = []
 
         for typ in types:
-            syn = endbulb_type(self.soma(0.5))
+            syn = synapse(self.soma(0.5))
             con = h.NetCon(None, syn)
 
             endbulbs.append((typ, syn, con, None))
@@ -151,7 +147,7 @@ class GBC_Point(object):
                 raise
 
             # Copy ANF train to the endbulb
-            bulb.spk = anf[idx].spk
+            bulb.spikes = anf[idx].spikes
 
             # Mark the train as `deleted'
             anf[idx].typ = 'del'
@@ -160,7 +156,7 @@ class GBC_Point(object):
 
     def init(self):
         for endbulb in self.endbulbs:
-            for sp in endbulb.spk:
+            for sp in endbulb.spikes:
                 endbulb.con.event(float(sp))
 
 
@@ -185,7 +181,7 @@ def main():
         print "weight:", bulb['typ'], bulb['con'].weight[0]
 
 
-    anf_type = [('typ', 'S3'), ('cf', float), ('id', int), ('spk', object)]
+    anf_type = [('typ', 'S3'), ('cf', float), ('id', int), ('spikes', object)]
     anf = [('hsr', 1000, 0, np.array([10,20])),
            ('hsr', 1000, 0, np.array([30,40])),
            ('hsr', 3333, 0, np.array([50,60])),
