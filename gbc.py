@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-03-02 17:12:14 marek>
+# Time-stamp: <2010-03-03 22:44:43 marek>
 
 # Description:
 
@@ -14,9 +14,9 @@ from neuron import h
 
 
 class GBC_Point(object):
-    def __init__(self, anf_num, cf, endbulb_class=h.ExpSyn, endbulb_pars=None,
+    def __init__(self, anf_num=(0,0,0), cf=1000,
+                 endbulb_class=h.ExpSyn, endbulb_pars=None,
                  threshold=-20):
-
 
         # Soma parameters from (Rothman & Manis 2003)
         self.soma = h.Section()
@@ -90,10 +90,9 @@ class GBC_Point(object):
         for typ in types:
             syn = endbulb_class(self.soma(0.5))
             con = h.NetCon(None, syn)
-
             endbulbs.append((typ, syn, con, None))
 
-        self.endbulbs = np.rec.array(endbulbs, dtype=self._endbulb_type)
+        self.endbulbs = np.array(endbulbs, dtype=self._endbulb_type)
 
         if endbulb_pars is not None:
             self.set_endbulb_pars(endbulb_pars)
@@ -142,23 +141,23 @@ class GBC_Point(object):
         for bulb in self.endbulbs:
             # Find the first matching ANF train
             try:
-                idx = np.where((anf.typ==bulb.typ) & (anf.cf==self.cf))[0][0]
+                idx = np.where((anf['typ']==bulb['typ']) & (anf['cf']==self.cf))[0][0]
             except IndexError:
                 print("***** Probably not enough ANF spike trains. *****")
                 raise
 
             # Copy ANF train to the endbulb
-            bulb.spikes = anf[idx].spikes
+            bulb['spikes'] = anf[idx]['spikes']
 
             # Mark the train as `deleted'
-            anf[idx].typ = 'del'
+            anf[idx]['typ'] = 'del'
 
 
 
     def init(self):
         for endbulb in self.endbulbs:
-            for sp in endbulb.spikes:
-                endbulb.con.event(float(sp))
+            for sp in endbulb['spikes']:
+                endbulb['con'].event(float(sp))
 
 
 
