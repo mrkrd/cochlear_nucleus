@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-03-02 17:12:14 marek>
+# Time-stamp: <2010-03-09 10:24:56 marek>
 
 # Description:
 
@@ -37,7 +37,7 @@ class GBC_Point(object):
         self.soma.ek = -77
         self.soma.ena = 50
 
-        q10 = 1.5
+        q10 = 2.0
         for seg in self.soma:
             seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
             seg.klt.gkltbar = self._Tf(q10) * self._nstomho(200, soma_area)

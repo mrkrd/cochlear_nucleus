@@ -1,3 +1,4 @@
 syntax: glob
 amd64
 *.pyc
+*.orig
