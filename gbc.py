@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-04-20 17:52:28 marek>
+# Time-stamp: <2010-04-20 18:09:58 marek>
 
 # Description:
 
@@ -23,8 +23,6 @@ class GBC_Point(object):
         # soma_area = 2500        # um2
         # Lstd = np.sqrt(soma_area/np.pi)
         Lstd = 19
-        soma_area = np.pi*Lstd**2
-        print Lstd, soma_area
 
         self.soma = h.Section()
 
@@ -50,7 +48,7 @@ class GBC_Point(object):
             seg.pas.g = self._Tf(q10) * 0.000167 #self._nstomho(2, soma_area)
             seg.pas.e = -65
 
-        h.psection(sec=self.soma)
+
         # Seting up synapses
         self._make_endbulbs(anf_num, endbulb_class, endbulb_pars)
         self.cf = float(cf)
