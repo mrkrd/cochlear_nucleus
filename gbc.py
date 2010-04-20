@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-03-09 15:07:44 marek>
+# Time-stamp: <2010-04-20 17:52:28 marek>
 
 # Description:
 
@@ -15,46 +15,50 @@ from neuron import h
 
 class GBC_Point(object):
     def __init__(self, anf_num=(0,0,0), cf=1000,
-                 endbulb_class=h.ExpSyn, endbulb_pars=None,
+                 endbulb_class=h.ExpSyn, endbulb_pars={'e': 0, 'tau': 0.2},
                  threshold=-20):
 
-        # Soma parameters from (Rothman & Manis 2003)
+        print "GBC temperature:", h.celsius, "C"
+
+        # soma_area = 2500        # um2
+        # Lstd = np.sqrt(soma_area/np.pi)
+        Lstd = 19
+        soma_area = np.pi*Lstd**2
+        print Lstd, soma_area
+
         self.soma = h.Section()
-        totcap = 12                             # pF
-        soma_area = totcap * 1e-6 / 1.0         # cm2
-        Lstd = 1e4 * np.sqrt(soma_area / np.pi) # um
 
         self.soma.insert('na_rothman93')
-        self.soma.insert('klt')
         self.soma.insert('kht')
+        self.soma.insert('klt')
         self.soma.insert('ih')
         self.soma.insert('pas')
 
         self.soma.L = Lstd
         self.soma.Ra = 150.0
         self.soma.diam = Lstd
-        self.soma.cm = 1
+        self.soma.cm = 0.9
         self.soma.ek = -77
         self.soma.ena = 50
 
-        q10 = 2.0
+        q10 = 2
         for seg in self.soma:
             seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
-            seg.klt.gkltbar = self._Tf(q10) * self._nstomho(200, soma_area)
-            seg.kht.gkhtbar = self._Tf(q10) * self._nstomho(150, soma_area)
-            seg.ih.ghbar = self._Tf(q10) * self._nstomho(20, soma_area)
-            seg.pas.g = self._Tf(q10) * self._nstomho(2, soma_area)
+            seg.kht.gkhtbar = self._Tf(q10) * 0.0125 #self._nstomho(150, soma_area)
+            seg.klt.gkltbar = self._Tf(q10) * 0.0167 #self._nstomho(200, soma_area)
+            seg.ih.ghbar = self._Tf(q10) * 0.00167 #self._nstomho(20, soma_area)
+            seg.pas.g = self._Tf(q10) * 0.000167 #self._nstomho(2, soma_area)
+            seg.pas.e = -65
 
-
+        h.psection(sec=self.soma)
         # Seting up synapses
         self._make_endbulbs(anf_num, endbulb_class, endbulb_pars)
         self.cf = float(cf)
 
 
         # Netcon for recording spikes
-        self.soma.push()
-        self._probe = h.NetCon(self.soma(0.5)._ref_v, None, threshold, 0, 0)
-        h.pop_section()
+        self._probe = h.NetCon(self.soma(0.5)._ref_v, None, threshold, 0, 0,
+                               sec=self.soma)
         self.spikes = h.Vector()
         self._probe.record(self.spikes)
 
@@ -92,7 +96,7 @@ class GBC_Point(object):
             con = h.NetCon(None, syn)
             endbulbs.append((typ, syn, con, None))
 
-        self.endbulbs = np.array(endbulbs, dtype=self._endbulb_type)
+        self._endbulbs = np.array(endbulbs, dtype=self._endbulb_type)
 
         if endbulb_pars is not None:
             self.set_endbulb_pars(endbulb_pars)
@@ -102,31 +106,31 @@ class GBC_Point(object):
         assert isinstance(endbulb_pars, dict)
 
         for key in endbulb_pars:
-            [setattr(syn, key, endbulb_pars[key]) for syn in self.endbulbs['syn']]
+            [setattr(syn, key, endbulb_pars[key]) for syn in self._endbulbs['syn']]
 
 
 
     def set_endbulb_weights(self, w):
         if isinstance(w, float) or isinstance(w, int):
-            for con in self.endbulbs['con']:
+            for con in self._endbulbs['con']:
                 con.weight[0] = w
 
         elif isinstance(w, dict):
             for typ in w:
-                q = (self.endbulbs['typ'] == typ)
-                for con in self.endbulbs[q]['con']:
+                q = (self._endbulbs['typ'] == typ)
+                for con in self._endbulbs[q]['con']:
                     con.weight[0] = w[typ]
 
         elif isinstance(w, tuple):
             for typ,wi in zip(('hsr','msr','lsr'),w):
-                q = (self.endbulbs['typ'] == typ)
-                for con in self.endbulbs[q]['con']:
+                q = (self._endbulbs['typ'] == typ)
+                for con in self._endbulbs[q]['con']:
                     con.weight[0] = wi
 
 
         elif isinstance(w, list):
-            assert len(w) == len(self.endbulbs)
-            for wi,con in zip(w, self.endbulbs['con']):
+            assert len(w) == len(self._endbulbs)
+            for wi,con in zip(w, self._endbulbs['con']):
                 con.weight[0] = wi
 
         else:
@@ -134,16 +138,14 @@ class GBC_Point(object):
 
 
 
-
     def load_anf_trains(self, anf):
-
         # Feed each synapse with a proper ANF train
-        for bulb in self.endbulbs:
-            # Find the first matching ANF train
+        for bulb in self._endbulbs:
             try:
+                # Find the first matching ANF train
                 idx = np.where((anf['typ']==bulb['typ']) & (anf['cf']==self.cf))[0][0]
             except IndexError:
-                print("***** Probably not enough ANF spike trains. *****")
+                print("***** Not enough ANF spike trains in ANF rec array. *****")
                 raise
 
             # Copy ANF train to the endbulb
@@ -155,30 +157,190 @@ class GBC_Point(object):
 
 
     def init(self):
-        for endbulb in self.endbulbs:
+        for endbulb in self._endbulbs:
+            try:
+                assert endbulb['spikes'] is not None
+            except AssertionError:
+                print("***** Not all endbulbs loaded with ANF spikes! *****")
+                raise
             for sp in endbulb['spikes']:
                 endbulb['con'].event(float(sp))
 
 
 
 
+
+
+
+class GBC_With_Axon(object):
+    def __init__(self, anf_num=(0,0,0), cf=1000,
+                 endbulb_class=h.ExpSyn, endbulb_pars={'e': 0, 'tau': 0.3},
+                 threshold=-20):
+
+        print "GBC temperature:", h.celsius, "C"
+
+        # Soma parameters from (Rothman & Manis 2003)
+        self.soma = h.Section()
+        totcap = 12                             # pF
+        soma_area = totcap * 1e-6 / 1.0         # cm2
+        Lstd = 1e4 * np.sqrt(soma_area / np.pi) # um
+        print Lstd, soma_area
+
+        self.soma.insert('na_rothman93')
+        self.soma.insert('klt')
+        self.soma.insert('kht')
+        self.soma.insert('ih')
+        self.soma.insert('pas')
+
+        self.soma.L = Lstd
+        self.soma.Ra = 150.0
+        self.soma.diam = Lstd
+        self.soma.cm = 1
+        self.soma.ek = -77
+        self.soma.ena = 50
+
+        q10 = 2.0
+        for seg in self.soma:
+            seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
+            seg.klt.gkltbar = self._Tf(q10) * 0.0167 #self._nstomho(200, soma_area)
+            seg.kht.gkhtbar = self._Tf(q10) * 0.0125 #self._nstomho(150, soma_area)
+            seg.ih.ghbar = self._Tf(q10) * 0.00167 #self._nstomho(20, soma_area)
+            seg.pas.g = self._Tf(q10) * 0.000167 #self._nstomho(2, soma_area)
+
+
+        # Seting up synapses
+        self._make_endbulbs(anf_num, endbulb_class, endbulb_pars)
+        self.cf = float(cf)
+
+
+        # Netcon for recording spikes
+        self._probe = h.NetCon(self.soma(0.5)._ref_v, None, threshold, 0, 0,
+                               sec=self.soma)
+        self.spikes = h.Vector()
+        self._probe.record(self.spikes)
+
+
+    def _nstomho(self, ns, area):
+        """
+        Rothman/Manis helper function.
+        """
+        return 1e-9 * ns / area
+
+
+    def _Tf(self, q10, ref_temp=22):
+        return q10 ** ((h.celsius - ref_temp)/10.0)
+
+
+    _endbulb_type  = [('typ', 'S3'),
+                      ('syn', object),
+                      ('con', object),
+                      ('spikes', object)]
+
+    def _make_endbulbs(self, anf_num, endbulb_class=h.ExpSyn, endbulb_pars=None):
+        """ anf_num: (hsr, msr, lsr) """
+        assert isinstance(anf_num, tuple)
+
+        hsr_num, msr_num, lsr_num = anf_num
+
+        types = ['hsr' for each in range(hsr_num)] + \
+            ['msr' for each in range(msr_num)] + \
+            ['lsr' for each in range(lsr_num)]
+
+        endbulbs = []
+
+        for typ in types:
+            syn = endbulb_class(self.soma(0.5))
+            con = h.NetCon(None, syn)
+            endbulbs.append((typ, syn, con, None))
+
+        self._endbulbs = np.array(endbulbs, dtype=self._endbulb_type)
+
+        if endbulb_pars is not None:
+            self.set_endbulb_pars(endbulb_pars)
+
+
+    def set_endbulb_pars(self, endbulb_pars):
+        assert isinstance(endbulb_pars, dict)
+
+        for key in endbulb_pars:
+            [setattr(syn, key, endbulb_pars[key]) for syn in self._endbulbs['syn']]
+
+
+
+    def set_endbulb_weights(self, w):
+        if isinstance(w, float) or isinstance(w, int):
+            for con in self._endbulbs['con']:
+                con.weight[0] = w
+
+        elif isinstance(w, dict):
+            for typ in w:
+                q = (self._endbulbs['typ'] == typ)
+                for con in self._endbulbs[q]['con']:
+                    con.weight[0] = w[typ]
+
+        elif isinstance(w, tuple):
+            for typ,wi in zip(('hsr','msr','lsr'),w):
+                q = (self._endbulbs['typ'] == typ)
+                for con in self._endbulbs[q]['con']:
+                    con.weight[0] = wi
+
+
+        elif isinstance(w, list):
+            assert len(w) == len(self._endbulbs)
+            for wi,con in zip(w, self._endbulbs['con']):
+                con.weight[0] = wi
+
+        else:
+            assert False
+
+
+
+    def load_anf_trains(self, anf):
+        # Feed each synapse with a proper ANF train
+        for bulb in self._endbulbs:
+            try:
+                # Find the first matching ANF train
+                idx = np.where((anf['typ']==bulb['typ']) & (anf['cf']==self.cf))[0][0]
+            except IndexError:
+                print("***** Not enough ANF spike trains in ANF rec array. *****")
+                raise
+
+            # Copy ANF train to the endbulb
+            bulb['spikes'] = anf[idx]['spikes']
+
+            # Mark the train as `deleted'
+            anf[idx]['typ'] = 'del'
+
+
+
+    def init(self):
+        for endbulb in self._endbulbs:
+            try:
+                assert endbulb['spikes'] is not None
+            except AssertionError:
+                print("***** Not all endbulbs loaded with ANF spikes! *****")
+                raise
+            for sp in endbulb['spikes']:
+                endbulb['con'].event(float(sp))
+
+
+
+
+
 def main():
-    import matplotlib.pyplot as plt
+    import biggles
 
     h.celsius = 37
 
     gbc = GBC_Point((2,1,1), cf=1000)
-    print gbc.endbulbs
 
-    pars = {'e':0, 'tau':0.5}
+    pars = {'e':0, 'tau':0.3}
     gbc.set_endbulb_pars(pars)
-    for syn in gbc.endbulbs['syn']:
-        print "tau:", syn.tau
 
-    weights = (0.006, 0.005, 0.003)
+
+    weights = (0.06, 0.005, 0.003)
     gbc.set_endbulb_weights(weights)
-    for bulb in gbc.endbulbs:
-        print "weight:", bulb['typ'], bulb['con'].weight[0]
+
 
 
     anf_type = [('typ', 'S3'), ('cf', float), ('id', int), ('spikes', object)]
@@ -199,9 +361,8 @@ def main():
     gbc.init()
     neuron.run(100)
 
-    print np.asarray(gbc.spikes)
-    plt.plot(v)
-    plt.show()
+    biggles.plot(v)
+
 
 
 if __name__ == "__main__":

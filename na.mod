@@ -47,7 +47,7 @@ STATE {
 }
 
 ASSIGNED {
-    ina (mA/cm2) 
+    ina (mA/cm2)
     gna (mho/cm2)
     minf hinf
     mtau (ms) htau (ms)
@@ -57,7 +57,7 @@ LOCAL mexp, hexp
 
 BREAKPOINT {
 	SOLVE states
-    
+
     gna = gnabar*(m^3)*h
     ina = gna*(v - ena)
 

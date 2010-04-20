@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-02-26 13:54:53 marek>
+# Time-stamp: <2010-04-19 15:29:44 marek>
 
 # Description:
 
@@ -18,6 +18,8 @@ neuron.load_mechanisms(lib_dir)
 
 from gbc import GBC_Point
 
-
+anf_type = [('typ', 'S3'),
+            ('cf', float),
+            ('spikes', np.ndarray)]
 
 
