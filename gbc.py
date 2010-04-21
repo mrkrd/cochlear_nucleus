@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-# Author: Marek Rudnicki
-# Time-stamp: <2010-04-20 18:09:58 marek>
-
-# Description:
-
 from __future__ import division
+__author__ = "Marek Rudnicki"
+
 import numpy as np
 import os
 
@@ -39,7 +36,7 @@ class GBC_Point(object):
         self.soma.ek = -77
         self.soma.ena = 50
 
-        q10 = 2
+        q10 = 1
         for seg in self.soma:
             seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
             seg.kht.gkhtbar = self._Tf(q10) * 0.0125 #self._nstomho(150, soma_area)
