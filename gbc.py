@@ -345,7 +345,7 @@ def main():
            ('msr', 1000, 0, np.array([70,80])),
            ('msr', 2222, 0, np.array([90,00])),
            ('lsr', 1000, 0, np.array([60,50]))]
-    anf = np.rec.array(anf, anf_type)
+    anf = np.array(anf, anf_type)
 
     gbc.load_anf_trains(anf)
 
