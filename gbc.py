@@ -36,7 +36,7 @@ class GBC_Point(object):
         self.soma.ek = -77
         self.soma.ena = 50
 
-        q10 = 1
+        q10 = 2
         for seg in self.soma:
             seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
             seg.kht.gkhtbar = self._Tf(q10) * 0.0125 #self._nstomho(150, soma_area)
