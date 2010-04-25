@@ -19,7 +19,7 @@ class GBC_Point(object):
 
         # soma_area = 2500        # um2
         # Lstd = np.sqrt(soma_area/np.pi)
-        Lstd = 19
+        Lstd = 20
 
         self.soma = h.Section()
 
