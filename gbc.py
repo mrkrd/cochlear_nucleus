@@ -10,7 +10,30 @@ import neuron
 from neuron import h
 
 
-class GBC_Point(object):
+class GBC_Template(object):
+    def _parse_endbulb_class(self, endbulb_class):
+        if endbulb_class == 'expsyn':
+            out = h.ExpSyn
+        elif endbulb_class == 'recov2exp':
+            out = h.Recov2Exp
+        else:
+            out = endbulb_class
+
+        return out
+
+
+    def _Tf(self, q10, ref_temp=22):
+        return q10 ** ((h.celsius - ref_temp)/10.0)
+
+
+    _endbulb_type  = [('typ', 'S3'),
+                      ('syn', object),
+                      ('con', object),
+                      ('spikes', object)]
+
+
+
+class GBC_Point(GBC_Template):
     def __init__(self, anf_num=(0,0,0), cf=1000,
                  endbulb_class=h.ExpSyn, endbulb_pars={'e': 0, 'tau': 0.2},
                  threshold=-20):
@@ -47,6 +70,7 @@ class GBC_Point(object):
 
 
         # Seting up synapses
+        endbulb_class = self._parse_endbulb_class(endbulb_class)
         self._make_endbulbs(anf_num, endbulb_class, endbulb_pars)
         self.cf = float(cf)
 
@@ -65,16 +89,8 @@ class GBC_Point(object):
         return 1e-9 * ns / area
 
 
-    def _Tf(self, q10, ref_temp=22):
-        return q10 ** ((h.celsius - ref_temp)/10.0)
 
-
-    _endbulb_type  = [('typ', 'S3'),
-                      ('syn', object),
-                      ('con', object),
-                      ('spikes', object)]
-
-    def _make_endbulbs(self, anf_num, endbulb_class=h.ExpSyn, endbulb_pars=None):
+    def _make_endbulbs(self, anf_num, endbulb_class, endbulb_pars=None):
         """ anf_num: (hsr, msr, lsr) """
         assert isinstance(anf_num, tuple)
 
@@ -167,7 +183,7 @@ class GBC_Point(object):
 
 
 
-class GBC_With_Axon(object):
+class GBC_With_Axon(GBC_Template):
     def __init__(self, anf_num=(0,0,0), cf=1000,
                  endbulb_class=h.ExpSyn, endbulb_pars={'e': 0, 'tau': 0.3},
                  threshold=-20):
@@ -222,14 +238,7 @@ class GBC_With_Axon(object):
         return 1e-9 * ns / area
 
 
-    def _Tf(self, q10, ref_temp=22):
-        return q10 ** ((h.celsius - ref_temp)/10.0)
 
-
-    _endbulb_type  = [('typ', 'S3'),
-                      ('syn', object),
-                      ('con', object),
-                      ('spikes', object)]
 
     def _make_endbulbs(self, anf_num, endbulb_class=h.ExpSyn, endbulb_pars=None):
         """ anf_num: (hsr, msr, lsr) """
