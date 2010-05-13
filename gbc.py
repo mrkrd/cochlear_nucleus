@@ -31,6 +31,8 @@ class GBC_Template(object):
                       ('con', object),
                       ('spikes', object)]
 
+    def get_spikes(self):
+        return np.asarray(self.spikes)
 
 
 class GBC_Point(GBC_Template):
