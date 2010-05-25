@@ -11,16 +11,6 @@ from neuron import h
 
 
 class GBC_Template(object):
-    def _parse_endbulb_class(self, endbulb_class):
-        if endbulb_class == 'expsyn':
-            out = h.ExpSyn
-        elif endbulb_class == 'recov2exp':
-            out = h.Recov2Exp
-        else:
-            out = endbulb_class
-
-        return out
-
 
     def _Tf(self, q10, ref_temp=22):
         return q10 ** ((h.celsius - ref_temp)/10.0)
@@ -35,9 +25,17 @@ class GBC_Template(object):
         return np.asarray(self.spikes)
 
 
+    def _nstomho(self, ns, area):
+        """
+        Rothman/Manis helper function.
+        """
+        return 1e-9 * ns / area
+
+
+
 class GBC_Point(GBC_Template):
     def __init__(self, anf_num=(0,0,0), cf=1000,
-                 endbulb_class=h.ExpSyn, endbulb_pars={'e': 0, 'tau': 0.2},
+                 endbulb_class="expsyn", endbulb_pars=None,
                  threshold=-20):
 
         print "GBC temperature:", h.celsius, "C"
@@ -71,9 +69,9 @@ class GBC_Point(GBC_Template):
             seg.pas.e = -65
 
 
+
         # Seting up synapses
-        endbulb_class = self._parse_endbulb_class(endbulb_class)
-        self._make_endbulbs(anf_num, endbulb_class, endbulb_pars)
+        self.make_endbulbs(anf_num, endbulb_class, endbulb_pars)
         self.cf = float(cf)
 
 
@@ -84,23 +82,33 @@ class GBC_Point(GBC_Template):
         self._probe.record(self.spikes)
 
 
-    def _nstomho(self, ns, area):
-        """
-        Rothman/Manis helper function.
-        """
-        return 1e-9 * ns / area
 
 
 
-    def _make_endbulbs(self, anf_num, endbulb_class, endbulb_pars=None):
+    def make_endbulbs(self, anf_num, endbulb_class, endbulb_pars=None):
         """ anf_num: (hsr, msr, lsr) """
         assert isinstance(anf_num, tuple)
 
         hsr_num, msr_num, lsr_num = anf_num
 
-        types = ['hsr' for each in range(hsr_num)] + \
-            ['msr' for each in range(msr_num)] + \
-            ['lsr' for each in range(lsr_num)]
+
+        if endbulb_class == "expsyn":
+            endbulb_class = h.ExpSyn
+            if endbulb_pars is None:
+                endbulb_pars = {'e': 0, 'tau': 0.2}
+        elif endbulb_class == "recov2exp":
+            endbulb_class = h.Recov2Exp
+            if endbulb_pars is None:
+                endbulb_pars = {'e': 0,
+                                'tau': 0.3,
+                                'tau_fast': 27,
+                                'tau_slow': 1000,
+                                'U': 0.47,
+                                'k': 0.6}
+
+        types = (['hsr' for each in range(hsr_num)] +
+                 ['msr' for each in range(msr_num)] +
+                 ['lsr' for each in range(lsr_num)])
 
         endbulbs = []
 
@@ -178,8 +186,6 @@ class GBC_Point(GBC_Template):
                 raise
             for sp in endbulb['spikes']:
                 endbulb['con'].event(float(sp))
-
-
 
 
 
@@ -340,7 +346,7 @@ def main():
 
     gbc = GBC_Point((2,1,1), cf=1000)
 
-    pars = {'e':0, 'tau':0.3}
+    pars = {'e':0, 'tau':0.2}
     gbc.set_endbulb_pars(pars)
 
 
