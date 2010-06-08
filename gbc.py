@@ -22,7 +22,7 @@ class GBC_Template(object):
                       ('spikes', object)]
 
     def get_spikes(self):
-        return np.asarray(self.spikes)
+        return np.array(self.spikes)
 
 
     def _nstomho(self, ns, area):
