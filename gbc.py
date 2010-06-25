@@ -374,7 +374,7 @@ def main():
     neuron.run(100)
 
     biggles.plot(v)
-
+    print gbc.soma(0.5).v
 
 
 if __name__ == "__main__":
