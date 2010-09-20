@@ -59,7 +59,7 @@ class GBC_Point(GBC_Template):
         self.soma.ek = -77
         self.soma.ena = 50
 
-        q10 = 2
+        q10 = 1.4
         for seg in self.soma:
             seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
             seg.kht.gkhtbar = self._Tf(q10) * 0.0125 #self._nstomho(150, soma_area)
@@ -85,11 +85,11 @@ class GBC_Point(GBC_Template):
 
 
 
-    def make_endbulbs(self, anf_num, endbulb_class, endbulb_pars=None):
-        """ anf_num: (hsr, msr, lsr) """
-        assert isinstance(anf_num, tuple)
+    def make_endbulbs(self, convergence, endbulb_class, endbulb_pars=None):
+        """ convergence: (hsr, msr, lsr) """
+        assert isinstance(convergence, tuple)
 
-        hsr_num, msr_num, lsr_num = anf_num
+        hsr_num, msr_num, lsr_num = convergence
 
 
         if endbulb_class == "expsyn":
@@ -160,6 +160,11 @@ class GBC_Point(GBC_Template):
 
 
     def load_anf_trains(self, anf):
+
+
+        idx = np.random.permutation(len(anf))
+        anf = np.array(anf[idx])
+
         # Feed each synapse with a proper ANF train
         for bulb in self._endbulbs:
             try:
