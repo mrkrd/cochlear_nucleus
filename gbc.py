@@ -4,7 +4,8 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
-import os
+
+import thorns as th
 
 import neuron
 from neuron import h
@@ -161,24 +162,18 @@ class GBC_Point(GBC_Template):
 
     def load_anf_trains(self, anf):
 
-
-        idx = np.random.permutation(len(anf))
-        anf = np.array(anf[idx])
+        hsr = anf.where(typ='hsr', cf=self.cf)
+        msr = anf.where(typ='msr', cf=self.cf)
+        lsr = anf.where(typ='lsr', cf=self.cf)
 
         # Feed each synapse with a proper ANF train
         for bulb in self._endbulbs:
-            try:
-                # Find the first matching ANF train
-                idx = np.where((anf['typ']==bulb['typ']) & (anf['cf']==self.cf))[0][0]
-            except IndexError:
-                print("***** Not enough ANF spike trains in ANF rec array. *****")
-                raise
-
-            # Copy ANF train to the endbulb
-            bulb['spikes'] = anf[idx]['spikes']
-
-            # Mark the train as `deleted'
-            anf[idx]['typ'] = 'del'
+            if bulb['typ'] == 'hsr':
+                bulb['spikes'] = hsr.pop_random()
+            if bulb['typ'] == 'msr':
+                bulb['spikes'] = msr.pop_random()
+            if bulb['typ'] == 'lsr':
+                bulb['spikes'] = lsr.pop_random()
 
 
 
@@ -215,15 +210,14 @@ def main():
     gbc.set_endbulb_weights(weights)
 
 
+    anf = th.SpikeTrains()
+    anf.append(np.array([10,20]), typ='hsr', cf=1000)
+    anf.append(np.array([30,40]), typ='hsr', cf=1000)
+    anf.append(np.array([50,60]), typ='hsr', cf=3333)
+    anf.append(np.array([70,80]), typ='msr', cf=1000)
+    anf.append(np.array([90,00]), typ='msr', cf=2222)
+    anf.append(np.array([60,50]), typ='lsr', cf=1000)
 
-    anf_type = [('typ', 'S3'), ('cf', float), ('id', int), ('spikes', object)]
-    anf = [('hsr', 1000, 0, np.array([10,20])),
-           ('hsr', 1000, 1, np.array([30,40])),
-           ('hsr', 3333, 0, np.array([50,60])),
-           ('msr', 1000, 0, np.array([70,80])),
-           ('msr', 2222, 0, np.array([90,00])),
-           ('lsr', 1000, 0, np.array([60,50]))]
-    anf = np.array(anf, anf_type)
 
     gbc.load_anf_trains(anf)
 
