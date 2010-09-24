@@ -194,7 +194,7 @@ class GBC_Point(GBC_Template):
 
 
     def init(self):
-        assert not self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
+        assert self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
 
         for endbulb in self._endbulbs:
             try:
