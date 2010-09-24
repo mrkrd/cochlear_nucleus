@@ -22,6 +22,7 @@ class GBC_Template(object):
                       ('con', object),
                       ('spikes', object)]
 
+
     def get_spikes(self):
         return np.array(self.spikes)
 
@@ -35,7 +36,15 @@ class GBC_Template(object):
 
 
 class GBC_Point(GBC_Template):
-    def __init__(self, anf_num=(0,0,0), cf=1000,
+    _default_weights = {'expsyn'+str((17,3,3)): (0.006, 0.015, 0.03),
+                        'expsyn'+str((27,4,3)): (0.005, 0.014, 0.019),
+                        'expsyn'+str((36,5,4)): (0.004, 0.015, 0.02),
+                        'recov2exp'+str((27,4,3)): (0.012, 0.015, 0.042),
+                        'recov2exp'+str((36,5,4)): (0.011, 0.009, 0.04),
+                        }
+
+
+    def __init__(self, convergence=(0,0,0), cf=1000,
                  endbulb_class="expsyn", endbulb_pars=None,
                  threshold=-20):
 
@@ -72,7 +81,7 @@ class GBC_Point(GBC_Template):
 
 
         # Seting up synapses
-        self.make_endbulbs(anf_num, endbulb_class, endbulb_pars)
+        self._make_endbulbs(convergence, endbulb_class, endbulb_pars)
         self.cf = float(cf)
 
 
@@ -83,10 +92,11 @@ class GBC_Point(GBC_Template):
         self._probe.record(self.spikes)
 
 
+        self._are_weights_set = False
 
 
 
-    def make_endbulbs(self, convergence, endbulb_class, endbulb_pars=None):
+    def _make_endbulbs(self, convergence, endbulb_class, endbulb_pars=None):
         """ convergence: (hsr, msr, lsr) """
         assert isinstance(convergence, tuple)
 
@@ -94,11 +104,11 @@ class GBC_Point(GBC_Template):
 
 
         if endbulb_class == "expsyn":
-            endbulb_class = h.ExpSyn
+            EndbulbClass = h.ExpSyn
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0, 'tau': 0.2}
         elif endbulb_class == "recov2exp":
-            endbulb_class = h.Recov2Exp
+            EndbulbClass = h.Recov2Exp
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0,
                                 'tau': 0.2,
@@ -114,7 +124,7 @@ class GBC_Point(GBC_Template):
         endbulbs = []
 
         for typ in types:
-            syn = endbulb_class(self.soma(0.5))
+            syn = EndbulbClass(self.soma(0.5))
             con = h.NetCon(None, syn)
             endbulbs.append((typ, syn, con, None))
 
@@ -122,6 +132,10 @@ class GBC_Point(GBC_Template):
 
         if endbulb_pars is not None:
             self.set_endbulb_pars(endbulb_pars)
+
+        key = endbulb_class+str(convergence)
+        if key in self._default_weights:
+            self.set_endbulb_weights(self._default_weights[key])
 
 
     def set_endbulb_pars(self, endbulb_pars):
@@ -133,6 +147,8 @@ class GBC_Point(GBC_Template):
 
 
     def set_endbulb_weights(self, w):
+        self._are_weights_set = True
+
         if isinstance(w, float) or isinstance(w, int):
             for con in self._endbulbs['con']:
                 con.weight[0] = w
@@ -178,6 +194,8 @@ class GBC_Point(GBC_Template):
 
 
     def init(self):
+        assert self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
+
         for endbulb in self._endbulbs:
             try:
                 assert endbulb['spikes'] is not None
