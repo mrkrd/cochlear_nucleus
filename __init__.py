@@ -1,11 +1,7 @@
-#!/usr/bin/env python
-
-# Author: Marek Rudnicki
-# Time-stamp: <2010-04-19 15:29:44 marek>
-
-# Description:
-
 from __future__ import division
+
+__author__ = "Marek Rudnicki"
+
 import numpy as np
 from collections import namedtuple
 import os
