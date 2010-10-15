@@ -2,7 +2,6 @@ from __future__ import division
 
 __author__ = "Marek Rudnicki"
 
-
 import numpy as np
 from collections import namedtuple
 import os
