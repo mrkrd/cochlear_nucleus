@@ -81,6 +81,7 @@ class GBC_Point(GBC_Template):
 
 
         # Seting up synapses
+        self._are_weights_set = False
         self._make_endbulbs(convergence, endbulb_class, endbulb_pars)
         self.cf = float(cf)
 
@@ -92,7 +93,6 @@ class GBC_Point(GBC_Template):
         self._probe.record(self.spikes)
 
 
-        self._are_weights_set = False
 
 
 
