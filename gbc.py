@@ -176,7 +176,7 @@ class GBC_Point(GBC_Template):
 
 
 
-    def load_anf_trains(self, anf):
+    def load_anf_trains(self, anf, random=False):
 
         hsr = anf.where(typ='hsr', cf=self.cf)
         msr = anf.where(typ='msr', cf=self.cf)
@@ -185,11 +185,11 @@ class GBC_Point(GBC_Template):
         # Feed each synapse with a proper ANF train
         for bulb in self._endbulbs:
             if bulb['typ'] == 'hsr':
-                bulb['spikes'] = hsr.pop_random()
+                bulb['spikes'] = hsr.pop(random)
             if bulb['typ'] == 'msr':
-                bulb['spikes'] = msr.pop_random()
+                bulb['spikes'] = msr.pop(random)
             if bulb['typ'] == 'lsr':
-                bulb['spikes'] = lsr.pop_random()
+                bulb['spikes'] = lsr.pop(random)
 
 
 
@@ -236,6 +236,9 @@ def main():
     anf.append(np.array([90,00]), typ='msr', cf=2222)
     anf.append(np.array([60,50]), typ='lsr', cf=1000)
 
+    print
+    print "ANFs before"
+    print anf
 
     gbc.load_anf_trains(anf)
 
@@ -246,9 +249,13 @@ def main():
     gbc.init()
     neuron.run(100)
 
-    biggles.plot(v)
-    print gbc.soma(0.5).v
+    print
+    print "ANFs after"
+    print anf
 
+    biggles.plot(v)
+    print
+    print gbc.soma(0.5).v
 
 if __name__ == "__main__":
     main()
