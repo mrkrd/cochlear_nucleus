@@ -103,11 +103,11 @@ class GBC_Point(GBC_Template):
         hsr_num, msr_num, lsr_num = convergence
 
 
-        if endbulb_class == "expsyn":
+        if endbulb_class in ("expsyn", "non-depressing"):
             EndbulbClass = h.ExpSyn
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0, 'tau': 0.2}
-        elif endbulb_class == "recov2exp":
+        elif endbulb_class in ("recov2exp", "yang2009impact"):
             EndbulbClass = h.Recov2Exp
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0,
@@ -116,6 +116,16 @@ class GBC_Point(GBC_Template):
                                 'tau_slow': 1000,
                                 'U': 0.47,
                                 'k': 0.6}
+        elif endbulb_pars == "little-depressing":
+            EndbulbClass = h.tmgsyn
+            if endbulb_pars is None:
+                # tau_rec, U: calclated analytically for 10%
+                # depression @ 300Hz
+                endbulb_pars = {"e": 0,
+                                "tau_1": 0.2,
+                                "tau_facil": 0,
+                                "tau_rec": 5.7858390699913,
+                                "U": 0.086568968290663}
 
         types = (['hsr' for each in range(hsr_num)] +
                  ['msr' for each in range(msr_num)] +
