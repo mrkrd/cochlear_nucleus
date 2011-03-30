@@ -116,7 +116,7 @@ class GBC_Point(GBC_Template):
                                 'tau_slow': 1000,
                                 'U': 0.47,
                                 'k': 0.6}
-        elif endbulb_pars == "little-depressing":
+        elif endbulb_class == "little-depressing":
             EndbulbClass = h.tmgsyn
             if endbulb_pars is None:
                 # tau_rec, U: calclated analytically for 10%
