@@ -36,11 +36,12 @@ class GBC_Template(object):
 
 
 class GBC_Point(GBC_Template):
-    _default_weights = {'expsyn'+str((17,3,3)): (0.006, 0.015, 0.03),
-                        'expsyn'+str((27,4,3)): (0.005, 0.014, 0.019),
-                        'expsyn'+str((36,5,4)): (0.004, 0.015, 0.02),
-                        'recov2exp'+str((27,4,3)): (0.012, 0.015, 0.042),
-                        'recov2exp'+str((36,5,4)): (0.011, 0.009, 0.04),
+    _default_weights = {'non-depressing'+str((17,3,3)): (0.0057, 0.0125, 0.0355),
+                        'non-depressing'+str((27,4,3)): (0.0048, 0.0095, 0.0221),
+                        'non-depressing'+str((36,5,4)): (0.0041, 0.0083, 0.0176),
+                        'yang2009impact'+str((17,4,3)): (0.0105, 0.0067, 0.2975),
+                        'yang2009impact'+str((27,4,3)): (0.0086, 0.0062, 0.2439),
+                        'yang2009impact'+str((36,5,4)): (0.0077, 0.0083, 0.1965),
                         }
 
 
@@ -104,10 +105,12 @@ class GBC_Point(GBC_Template):
 
 
         if endbulb_class in ("expsyn", "non-depressing"):
+            endbulb_class = "non-depressing"
             EndbulbClass = h.ExpSyn
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0, 'tau': 0.2}
         elif endbulb_class in ("recov2exp", "yang2009impact"):
+            endbulb_class = "yang2009impact"
             EndbulbClass = h.Recov2Exp
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0,
