@@ -117,13 +117,12 @@ class GBC_Point(GBC_Template):
                                 'U': 0.47,
                                 'k': 0.6}
         elif endbulb_class == "little-depressing":
-            EndbulbClass = h.tmgsyn
+            EndbulbClass = h.RecovExp
             if endbulb_pars is None:
                 # tau_rec, U: calclated analytically for 10%
                 # depression @ 300Hz
                 endbulb_pars = {"e": 0,
-                                "tau_1": 0.2,
-                                "tau_facil": 0,
+                                "tau": 0.2,
                                 "tau_rec": 5.7858390699913,
                                 "U": 0.086568968290663}
 
