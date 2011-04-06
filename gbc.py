@@ -42,6 +42,9 @@ class GBC_Point(GBC_Template):
                         'yang2009impact'+str((17,4,3)): (0.0105, 0.0067, 0.2975),
                         'yang2009impact'+str((27,4,3)): (0.0086, 0.0062, 0.2439),
                         'yang2009impact'+str((36,5,4)): (0.0077, 0.0083, 0.1965),
+                        'little-depressing'+str((17,3,3)): (0.0056, 0.0131, 0.0386),
+                        'little-depressing'+str((27,4,3)): (0.0050, 0.0099, 0.0244),
+                        'little-depressing'+str((36,5,4)): (0.0042, 0.0087, 0.0185),
                         }
 
 
