@@ -36,13 +36,12 @@ class GBC_Template(object):
 
 
 class GBC_Point(GBC_Template):
-    _default_weights = {'non-depressing'+str((17,3,3)): (0.0057, 0.0125, 0.0355),
-                        'non-depressing'+str((27,4,3)): (0.0048, 0.0095, 0.0221),
-                        'non-depressing'+str((36,5,4)): (0.0041, 0.0083, 0.0176),
-                        'yang2009impact'+str((17,3,3)): (0.0105, 0.0067, 0.2975),
-                        'yang2009impact'+str((27,4,3)): (0.0086, 0.0062, 0.2439),
-                        'yang2009impact'+str((36,5,4)): (0.0081, 0.0073, 0.1908),
-                        # 'yang2009impact'+str((36,5,4)): (0.0077, 0.0083, 0.1965),
+    _default_weights = {'non-depressing'+str((17,3,3)): (0.0054, 0.0093, 0.0178),
+                        'non-depressing'+str((27,4,3)): (0.0042 | 0.0087 | 0.0094),
+                        'non-depressing'+str((36,5,4)): (0.0035 | 0.0061 | 0.0063),
+                        'yang2009impact'+str((17,3,3)): (0.0111 | 0.0120 | 0.1475),
+                        'yang2009impact'+str((27,4,3)): (0.0113 | 0.0129 | 0.1018),
+                        'yang2009impact'+str((36,5,4)): (0.0099 | 0.0107 | 0.0555),
                         'little-depressing'+str((17,3,3)): (0.0056, 0.0131, 0.0386),
                         'little-depressing'+str((27,4,3)): (0.0050, 0.0099, 0.0244),
                         'little-depressing'+str((36,5,4)): (0.0042, 0.0087, 0.0185),
