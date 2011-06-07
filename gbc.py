@@ -37,18 +37,19 @@ class GBC_Template(object):
 
 class GBC_Point(GBC_Template):
     _default_weights = {
-        'non-depressing'+str((17,3,3)): ( 0.0065 , 0.0115 , 0.0301 , ),
-        'non-depressing'+str((27,4,3)): ( 0.0053 , 0.0099 , 0.0237 , ),
-        'non-depressing'+str((36,5,4)): ( 0.0044 , 0.0088 , 0.0204 , ),
-        'non-depressing'+str((55,8,6)): ( 0.0036 , 0.0071 , 0.0127 , ),
-        'non-depressing'+str((23,0,0)): ( 0.0060 , 0.0 , 0.0 , ),
-        'non-depressing'+str((47,0,0)): ( 0.0041 , 0.0 , 0.0 , ),
-        'yang2009impact'+str((17,3,3)): ( 0.0117 , 0.4540 , 0.3351 , ),
-        'yang2009impact'+str((27,4,3)): ( 0.0124 , 0.1471 , 0.0944 , ),
-        'yang2009impact'+str((36,5,4)): ( 0.0111 , 0.0131 , 0.0810 , ),
-        # 'little-depressing'+str((17,3,3)): (0.0055, 0.0096, 0.0188),
-        # 'little-depressing'+str((27,4,3)): (0.0043, 0.0088, 0.0113),
-        # 'little-depressing'+str((36,5,4)): (0.0036, 0.0064, 0.0070),
+        'non-depressing'+str((17,3,3)): ( 0.0064 , 0.0126 , 0.0306 , ),
+        'non-depressing'+str((23,0,0)): ( 0.0059 , 0.0000 , 0.0000 , ),
+        'non-depressing'+str((27,4,3)): ( 0.0052 , 0.0101 , 0.0222 , ),
+        'non-depressing'+str((36,5,4)): ( 0.0044 , 0.0093 , 0.0173 , ),
+        'non-depressing'+str((47,0,0)): ( 0.0041 , 0.0000 , 0.0000 , ),
+        'non-depressing'+str((55,8,6)): ( 0.0035 , 0.0073 , 0.0131 , ),
+
+        'yang2009impact'+str((36,5,4)): ( 0.0112 , 0.0122 , 0.0773 , ),
+
+        'little-depressing'+str((17,3,3)): ( 0.0066 , 0.0123 , 0.0305 , ),
+        'little-depressing'+str((27,4,3)): ( 0.0053 , 0.0105 , 0.0216 , ),
+        'little-depressing'+str((36,5,4)): ( 0.0045 , 0.0097 , 0.0177 , ),
+        'little-depressing'+str((55,8,6)): ( 0.0036 , 0.0079 , 0.0139 , )
     }
 
 
