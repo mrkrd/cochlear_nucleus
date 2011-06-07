@@ -36,16 +36,20 @@ class GBC_Template(object):
 
 
 class GBC_Point(GBC_Template):
-    _default_weights = {'non-depressing'+str((17,3,3)): (0.0054, 0.0093, 0.0178),
-                        'non-depressing'+str((27,4,3)): (0.0042, 0.0087, 0.0097),
-                        'non-depressing'+str((36,5,4)): (0.0035, 0.0061, 0.0062),
-                        'yang2009impact'+str((17,3,3)): (0.0111, 0.0113, 0.1478),
-                        'yang2009impact'+str((27,4,3)): (0.0113, 0.0128, 0.1014),
-                        'yang2009impact'+str((36,5,4)): (0.0099, 0.0107, 0.0555),
-                        'little-depressing'+str((17,3,3)): (0.0055, 0.0096, 0.0188),
-                        'little-depressing'+str((27,4,3)): (0.0043, 0.0088, 0.0113),
-                        'little-depressing'+str((36,5,4)): (0.0036, 0.0064, 0.0070),
-                        }
+    _default_weights = {
+        'non-depressing'+str((17,3,3)): ( 0.0065 , 0.0115 , 0.0301 , ),
+        'non-depressing'+str((27,4,3)): ( 0.0053 , 0.0099 , 0.0237 , ),
+        'non-depressing'+str((36,5,4)): ( 0.0044 , 0.0088 , 0.0204 , ),
+        'non-depressing'+str((55,8,6)): ( 0.0036 , 0.0071 , 0.0127 , ),
+        'non-depressing'+str((23,0,0)): ( 0.0060 , 0.0 , 0.0 , ),
+        'non-depressing'+str((47,0,0)): ( 0.0041 , 0.0 , 0.0 , ),
+        'yang2009impact'+str((17,3,3)): ( 0.0117 , 0.4540 , 0.3351 , ),
+        'yang2009impact'+str((27,4,3)): ( 0.0124 , 0.1471 , 0.0944 , ),
+        'yang2009impact'+str((36,5,4)): ( 0.0111 , 0.0131 , 0.0810 , ),
+        # 'little-depressing'+str((17,3,3)): (0.0055, 0.0096, 0.0188),
+        # 'little-depressing'+str((27,4,3)): (0.0043, 0.0088, 0.0113),
+        # 'little-depressing'+str((36,5,4)): (0.0036, 0.0064, 0.0070),
+    }
 
 
     def __init__(self, convergence=(0,0,0), cf=1000,
