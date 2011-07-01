@@ -123,7 +123,7 @@ class GBC_Point(GBC_Template):
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0,
                                 'tau': 0.2,
-                                'tau_fast': 27,
+                                'tau_fast': 26,
                                 'tau_slow': 1000,
                                 'U': 0.47,
                                 'k': 0.6}
