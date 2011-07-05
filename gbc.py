@@ -127,7 +127,7 @@ class GBC_Point(GBC_Template):
                                 'tau_slow': 1000,
                                 'U': 0.47,
                                 'k': 0.6}
-        elif endbulb_class == "little-depressing":
+        elif endbulb_class in ("little-depressing", "10%-depressing"):
             EndbulbClass = h.RecovExp
             if endbulb_pars is None:
                 # tau_rec, U: calclated analytically for 10%
@@ -136,6 +136,15 @@ class GBC_Point(GBC_Template):
                                 "tau": 0.2,
                                 "tau_rec": 5.7858390699913,
                                 "U": 0.086568968290663}
+        elif endbulb_class == "20%-depressing":
+            EndbulbClass = h.RecovExp
+            if endbulb_pars is None:
+                # tau_rec, U: calclated analytically for 20%
+                # depression @ 300Hz
+                endbulb_pars = {"e": 0,
+                                "tau": 0.2,
+                                "tau_rec": 6.7600326478197,
+                                "U": 0.15934371552475}
 
         types = (['hsr' for each in range(hsr_num)] +
                  ['msr' for each in range(msr_num)] +
