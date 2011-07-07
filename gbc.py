@@ -54,7 +54,7 @@ class GBC_Point(GBC_Template):
 
 
     def __init__(self, convergence=(0,0,0), cf=1000,
-                 endbulb_class="expsyn", endbulb_pars=None,
+                 endbulb_class="non-depressing", endbulb_pars=None,
                  threshold=-20):
 
         print "GBC temperature:", h.celsius, "C"
