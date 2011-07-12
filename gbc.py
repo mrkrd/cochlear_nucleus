@@ -46,10 +46,15 @@ class GBC_Point(GBC_Template):
 
         'yang2009impact'+str((36,5,4)): ( 0.0111 , 0.0128 , 0.0614 , ),
 
-        'little-depressing'+str((17,3,3)): ( 0.0066 , 0.0123 , 0.0305 , ),
-        'little-depressing'+str((27,4,3)): ( 0.0053 , 0.0105 , 0.0216 , ),
-        'little-depressing'+str((36,5,4)): ( 0.0046 , 0.0096 , 0.0183 , ),
-        'little-depressing'+str((55,8,6)): ( 0.0036 , 0.0079 , 0.0139 , )
+        '10%-depressing'+str((17,3,3)): ( 0.0066 , 0.0123 , 0.0305 , ),
+        '10%-depressing'+str((27,4,3)): ( 0.0053 , 0.0105 , 0.0216 , ),
+        '10%-depressing'+str((36,5,4)): ( 0.0046 , 0.0096 , 0.0183 , ),
+        '10%-depressing'+str((55,8,6)): ( 0.0036 , 0.0079 , 0.0139 , ),
+
+        '20%-depressing'+str((17,3,3)): ( 0.0068 , 0.0127 , 0.0325 , ),
+        '20%-depressing'+str((27,4,3)): ( 0.0055 , 0.0106 , 0.0238 , ),
+        '20%-depressing'+str((36,5,4)): ( 0.0047 , 0.0099 , 0.0205 , ),
+        '20%-depressing'+str((55,8,6)): ( 0.0038 , 0.0085 , 0.0155 , ),
     }
 
 
@@ -128,6 +133,7 @@ class GBC_Point(GBC_Template):
                                 'U': 0.47,
                                 'k': 0.6}
         elif endbulb_class in ("little-depressing", "10%-depressing"):
+            endbulb_class = '10%-depressing'
             EndbulbClass = h.RecovExp
             if endbulb_pars is None:
                 # tau_rec, U: calclated analytically for 10%
