@@ -263,7 +263,7 @@ def main():
     gbc.set_endbulb_weights(weights)
 
 
-    anf = th.SpikeTrains()
+    anf = th.Trains()
     anf.append(np.array([10,20]), typ='hsr', cf=1000)
     anf.append(np.array([30,40]), typ='hsr', cf=1000)
     anf.append(np.array([50,60]), typ='hsr', cf=3333)
