@@ -17,14 +17,15 @@ class GBC_Template(object):
         return q10 ** ((h.celsius - ref_temp)/10.0)
 
 
-    _endbulb_type  = [('typ', 'S3'),
-                      ('syn', object),
-                      ('con', object),
-                      ('spikes', object)]
-
-
     def get_spikes(self):
-        return np.array(self.spikes)
+        assert h.t != 0, "Time is 0 (did you run the simulation already?)"
+
+        train = np.array( (np.array(self._spikes), h.t, self.cf),
+                          dtype=[('spikes', np.ndarray),
+                                 ('duration', float),
+                                 ('cf', float)] )
+        return train
+
 
 
     def _nstomho(self, ns, area):
@@ -58,11 +59,16 @@ class GBC_Point(GBC_Template):
     }
 
 
-    def __init__(self, convergence=(0,0,0), cf=1000,
-                 endbulb_class="non-depressing", endbulb_pars=None,
-                 threshold=-20):
+    def __init__(self,
+                 convergence=(0,0,0),
+                 cf=1000,
+                 endbulb_class="non-depressing",
+                 endbulb_pars=None,
+                 threshold=-20,
+                 debug=True):
 
-        print "GBC temperature:", h.celsius, "C"
+        if debug:
+            print "GBC temperature:", h.celsius, "C"
 
         # soma_area = 2500        # um2
         # Lstd = np.sqrt(soma_area/np.pi)
@@ -103,8 +109,8 @@ class GBC_Point(GBC_Template):
         # Netcon for recording spikes
         self._probe = h.NetCon(self.soma(0.5)._ref_v, None, threshold, 0, 0,
                                sec=self.soma)
-        self.spikes = h.Vector()
-        self._probe.record(self.spikes)
+        self._spikes = h.Vector()
+        self._probe.record(self._spikes)
 
 
 
@@ -115,6 +121,9 @@ class GBC_Point(GBC_Template):
         assert isinstance(convergence, tuple)
 
         hsr_num, msr_num, lsr_num = convergence
+
+        # Endbulbs will be stored here
+        self._endbulbs = []
 
 
         if endbulb_class in ("expsyn", "non-depressing"):
@@ -152,32 +161,34 @@ class GBC_Point(GBC_Template):
                                 "tau_rec": 6.7600326478197,
                                 "U": 0.15934371552475}
 
-        types = (['hsr' for each in range(hsr_num)] +
-                 ['msr' for each in range(msr_num)] +
-                 ['lsr' for each in range(lsr_num)])
+        anf_types = (['hsr' for each in range(hsr_num)] +
+                     ['msr' for each in range(msr_num)] +
+                     ['lsr' for each in range(lsr_num)])
 
-        endbulbs = []
 
-        for typ in types:
+        for typ in anf_types:
             syn = EndbulbClass(self.soma(0.5))
-            con = h.NetCon(None, syn)
-            endbulbs.append((typ, syn, con, None))
 
-        self._endbulbs = np.array(endbulbs, dtype=self._endbulb_type)
+            self._endbulbs.append(
+                {'anf_type': typ,
+                 'syn': syn,
+                 'con': h.NetCon(None, syn)}
+            )
 
-        if endbulb_pars is not None:
-            self.set_endbulb_pars(endbulb_pars)
 
-        key = endbulb_class+str(convergence)
-        if key in self._default_weights:
+        self.set_endbulb_pars(endbulb_pars)
+
+        weight_key = endbulb_class+str(convergence)
+        if weight_key in self._default_weights:
             self.set_endbulb_weights(self._default_weights[key])
 
 
     def set_endbulb_pars(self, endbulb_pars):
         assert isinstance(endbulb_pars, dict)
 
-        for key in endbulb_pars:
-            [setattr(syn, key, endbulb_pars[key]) for syn in self._endbulbs['syn']]
+        for bulb in self._endbulbs:
+            for par,val in endbulb_pars.items():
+                setattr(bulb['syn'], par, val)
 
 
 
@@ -185,60 +196,78 @@ class GBC_Point(GBC_Template):
         self._are_weights_set = True
 
         if isinstance(w, float) or isinstance(w, int):
-            for con in self._endbulbs['con']:
-                con.weight[0] = w
-
-        elif isinstance(w, dict):
-            for typ in w:
-                q = (self._endbulbs['typ'] == typ)
-                for con in self._endbulbs[q]['con']:
-                    con.weight[0] = w[typ]
+            for bulb in self._endbulbs:
+                bulb['con'].weight[0] = w
 
         elif isinstance(w, tuple):
-            for typ,wi in zip(('hsr','msr','lsr'),w):
-                q = (self._endbulbs['typ'] == typ)
-                for con in self._endbulbs[q]['con']:
-                    con.weight[0] = wi
+            wh, wm, wl = w
 
+            for bulb in self._endbulbs:
+                if bulb['anf_type'] == 'hsr':
+                    bulb['con'].weight[0] = wh
+                elif bulb['anf_type'] == 'msr':
+                    bulb['con'].weight[0] = wm
+                elif bulb['anf_type'] == 'lsr':
+                    bulb['con'].weight[0] = wl
 
         elif isinstance(w, list):
             assert len(w) == len(self._endbulbs)
-            for wi,con in zip(w, self._endbulbs['con']):
-                con.weight[0] = wi
+
+            for wi,bulb in zip(w, self._endbulbs):
+                bulb['con'].weight[0] = wi
 
         else:
             assert False
 
 
 
-    def load_anf_trains(self, anf, random=False):
+    def load_anf_trains(self, anf):
 
-        hsr = anf.where(typ='hsr', cf=self.cf)
-        msr = anf.where(typ='msr', cf=self.cf)
-        lsr = anf.where(typ='lsr', cf=self.cf)
+        hsr_idx = np.where(
+            (anf['anf_type']=='hsr') & (anf['cf']==self.cf)
+        )[0].tolist()
+
+        msr_idx = np.where(
+            (anf['anf_type']=='msr') & (anf['cf']==self.cf)
+        )[0].tolist()
+
+        lsr_idx = np.where(
+            (anf['anf_type']=='lsr') & (anf['cf']==self.cf)
+        )[0].tolist()
+
 
         # Feed each synapse with a proper ANF train
         for bulb in self._endbulbs:
-            if bulb['typ'] == 'hsr':
-                bulb['spikes'] = hsr.pop(random)
-            if bulb['typ'] == 'msr':
-                bulb['spikes'] = msr.pop(random)
-            if bulb['typ'] == 'lsr':
-                bulb['spikes'] = lsr.pop(random)
+            if bulb['anf_type'] == 'hsr':
+                i = hsr_idx.pop(
+                    np.random.randint(0, len(hsr_idx))
+                )
+                bulb['spikes'] = anf[i]['spikes']
+
+            elif bulb['anf_type'] == 'msr':
+                i = msr_idx.pop(
+                    np.random.randint(0, len(msr_idx))
+                )
+                bulb['spikes'] = anf[i]['spikes']
+
+            elif bulb['anf_type'] == 'lsr':
+                i = lsr_idx.pop(
+                    np.random.randint(0, len(lsr_idx))
+                )
+                bulb['spikes'] = anf[i]['spikes']
+
+
 
 
 
     def init(self):
         assert self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
 
-        for endbulb in self._endbulbs:
-            try:
-                assert endbulb['spikes'] is not None
-            except AssertionError:
-                print("***** Not all endbulbs loaded with ANF spikes! *****")
-                raise
-            for sp in endbulb['spikes']:
-                endbulb['con'].event(float(sp))
+        for bulb in self._endbulbs:
+            assert bulb.has_key('spikes'), "***** Not all endbulbs loaded with ANF spikes! *****"
+
+            for sp in bulb['spikes']:
+                bulb['con'].event(float(sp))
 
 
 
@@ -263,17 +292,23 @@ def main():
     gbc.set_endbulb_weights(weights)
 
 
-    anf = th.Trains()
-    anf.append(np.array([10,20]), typ='hsr', cf=1000)
-    anf.append(np.array([30,40]), typ='hsr', cf=1000)
-    anf.append(np.array([50,60]), typ='hsr', cf=3333)
-    anf.append(np.array([70,80]), typ='msr', cf=1000)
-    anf.append(np.array([90,00]), typ='msr', cf=2222)
-    anf.append(np.array([60,50]), typ='lsr', cf=1000)
+    anf = [
+        (np.array([10,20]), 'hsr', 1000, 100),
+        (np.array([30,40]), 'hsr', 1000, 100),
+        (np.array([50,60]), 'hsr', 3333, 100),
+        (np.array([70,80]), 'msr', 1000, 100),
+        (np.array([90,00]), 'msr', 2222, 100),
+        (np.array([60,50]), 'lsr', 1000, 100)
+    ]
+    anf = np.rec.array(anf, dtype=[('spikes', np.ndarray),
+                                   ('anf_type', '|S3'),
+                                   ('cf', float),
+                                   ('duration', float)])
 
     print
     print "ANFs before"
     print anf
+
 
     gbc.load_anf_trains(anf)
 
@@ -290,7 +325,11 @@ def main():
 
     biggles.plot(v)
     print
-    print gbc.soma(0.5).v
+    print "GBC voltage", gbc.soma(0.5).v
+    print
+    print "Output spike trains"
+    print gbc.get_spikes()
+
 
 if __name__ == "__main__":
     main()
