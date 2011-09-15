@@ -20,7 +20,7 @@ class GBC_Template(object):
     def get_spikes(self):
         assert h.t != 0, "Time is 0 (did you run the simulation already?)"
 
-        train = np.array( (np.array(self._spikes), h.t, self.cf),
+        train = np.array( [(np.array(self._spikes), h.t, self.cf)],
                           dtype=[('spikes', np.ndarray),
                                  ('duration', float),
                                  ('cf', float)] )
