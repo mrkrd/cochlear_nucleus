@@ -180,7 +180,9 @@ class GBC_Point(GBC_Template):
 
         weight_key = endbulb_class+str(convergence)
         if weight_key in self._default_weights:
-            self.set_endbulb_weights(self._default_weights[key])
+            self.set_endbulb_weights(
+                self._default_weights[weight_key]
+            )
 
 
     def set_endbulb_pars(self, endbulb_pars):
