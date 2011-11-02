@@ -331,6 +331,10 @@ def main():
     print
     print "Output spike trains"
     print gbc.get_spikes()
+    a = gbc.get_spikes()
+    b = gbc.get_spikes()
+
+    print np.concatenate([a, b]).dtype
 
 
 if __name__ == "__main__":
