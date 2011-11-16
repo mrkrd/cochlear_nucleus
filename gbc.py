@@ -160,6 +160,8 @@ class GBC_Point(GBC_Template):
                                 "tau": 0.2,
                                 "tau_rec": 6.7600326478197,
                                 "U": 0.15934371552475}
+        else:
+            assert False, "Synapse \"%s\" not implemented"%endbulb_class
 
         anf_types = (['hsr' for each in range(hsr_num)] +
                      ['msr' for each in range(msr_num)] +
