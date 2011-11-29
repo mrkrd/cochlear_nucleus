@@ -38,6 +38,7 @@ class GBC_Template(object):
 
 class GBC_Point(GBC_Template):
     _default_weights = {
+        'non-depressing'+str((10,2,1)): ( 0.0079 , 0.0147 , 0.0332 , ),
         'non-depressing'+str((17,3,3)): ( 0.0064 , 0.0126 , 0.0306 , ),
         'non-depressing'+str((23,0,0)): ( 0.0059 , 0.0000 , 0.0000 , ),
         'non-depressing'+str((27,4,3)): ( 0.0052 , 0.0101 , 0.0222 , ),
