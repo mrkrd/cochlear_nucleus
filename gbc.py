@@ -24,7 +24,7 @@ class GBC_Template(object):
                           dtype=[('spikes', np.ndarray),
                                  ('duration', float),
                                  ('cf', float),
-                                 ('neuron', '|S3')]
+                                 ('type', '|S3')]
         )
         return train
 
@@ -175,7 +175,7 @@ class GBC_Point(GBC_Template):
             syn = EndbulbClass(self.soma(0.5))
 
             self._endbulbs.append(
-                {'neuron': typ,
+                {'type': typ,
                  'syn': syn,
                  'con': h.NetCon(None, syn)}
             )
@@ -210,11 +210,11 @@ class GBC_Point(GBC_Template):
             wh, wm, wl = w
 
             for bulb in self._endbulbs:
-                if bulb['neuron'] == 'hsr':
+                if bulb['type'] == 'hsr':
                     bulb['con'].weight[0] = wh
-                elif bulb['neuron'] == 'msr':
+                elif bulb['type'] == 'msr':
                     bulb['con'].weight[0] = wm
-                elif bulb['neuron'] == 'lsr':
+                elif bulb['type'] == 'lsr':
                     bulb['con'].weight[0] = wl
 
         elif isinstance(w, list):
@@ -231,33 +231,33 @@ class GBC_Point(GBC_Template):
     def load_anf_trains(self, anf):
 
         hsr_idx = np.where(
-            (anf['neuron']=='hsr') & (anf['cf']==self.cf)
+            (anf['type']=='hsr') & (anf['cf']==self.cf)
         )[0].tolist()
 
         msr_idx = np.where(
-            (anf['neuron']=='msr') & (anf['cf']==self.cf)
+            (anf['type']=='msr') & (anf['cf']==self.cf)
         )[0].tolist()
 
         lsr_idx = np.where(
-            (anf['neuron']=='lsr') & (anf['cf']==self.cf)
+            (anf['type']=='lsr') & (anf['cf']==self.cf)
         )[0].tolist()
 
 
         # Feed each synapse with a proper ANF train
         for bulb in self._endbulbs:
-            if bulb['neuron'] == 'hsr':
+            if bulb['type'] == 'hsr':
                 i = hsr_idx.pop(
                     np.random.randint(0, len(hsr_idx))
                 )
                 bulb['spikes'] = anf[i]['spikes']
 
-            elif bulb['neuron'] == 'msr':
+            elif bulb['type'] == 'msr':
                 i = msr_idx.pop(
                     np.random.randint(0, len(msr_idx))
                 )
                 bulb['spikes'] = anf[i]['spikes']
 
-            elif bulb['neuron'] == 'lsr':
+            elif bulb['type'] == 'lsr':
                 i = lsr_idx.pop(
                     np.random.randint(0, len(lsr_idx))
                 )
@@ -308,7 +308,7 @@ def main():
         (np.array([60,50]), 'lsr', 1000, 100)
     ]
     anf = np.rec.array(anf, dtype=[('spikes', np.ndarray),
-                                   ('neuron', '|S3'),
+                                   ('type', '|S3'),
                                    ('cf', float),
                                    ('duration', float)])
 
