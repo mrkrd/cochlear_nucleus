@@ -40,32 +40,32 @@ class GBC_Template(object):
 
 class GBC_Point(GBC_Template):
     _default_weights = {
-        'non-depressing'+str((10,2,1)): ( 0.0079 , 0.0147 , 0.0332 , ),
-        'non-depressing'+str((17,3,3)): ( 0.0064 , 0.0126 , 0.0306 , ),
-        'non-depressing'+str((23,0,0)): ( 0.0059 , 0.0000 , 0.0000 , ),
-        'non-depressing'+str((27,4,3)): ( 0.0052 , 0.0101 , 0.0222 , ),
-        'non-depressing'+str((36,5,4)): ( 0.0045 , 0.0097 , 0.0179 , ),
-        'non-depressing'+str((47,0,0)): ( 0.0041 , 0.0000 , 0.0000 , ),
-        'non-depressing'+str((55,8,6)): ( 0.0035 , 0.0073 , 0.0131 , ),
+        ('tonic', (10,2,1)): ( 0.0079 , 0.0147 , 0.0332 , ),
+        ('tonic', (17,3,3)): ( 0.0064 , 0.0126 , 0.0306 , ),
+        ('tonic', (23,0,0)): ( 0.0059 , 0.0000 , 0.0000 , ),
+        ('tonic', (27,4,3)): ( 0.0052 , 0.0101 , 0.0222 , ),
+        ('tonic', (36,5,4)): ( 0.0045 , 0.0097 , 0.0179 , ),
+        ('tonic', (47,0,0)): ( 0.0041 , 0.0000 , 0.0000 , ),
+        ('tonic', (55,8,6)): ( 0.0035 , 0.0073 , 0.0131 , ),
 
-        'yang2009impact'+str((36,5,4)): ( 0.0111 , 0.0128 , 0.0614 , ),
+        ('yang2009impact', (36,5,4)): ( 0.0111 , 0.0128 , 0.0614 , ),
 
-        '10%-depressing'+str((17,3,3)): ( 0.0066 , 0.0123 , 0.0305 , ),
-        '10%-depressing'+str((27,4,3)): ( 0.0053 , 0.0105 , 0.0216 , ),
-        '10%-depressing'+str((36,5,4)): ( 0.0046 , 0.0096 , 0.0183 , ),
-        '10%-depressing'+str((55,8,6)): ( 0.0036 , 0.0079 , 0.0139 , ),
+        ('10%-depressing', (17,3,3)): ( 0.0066 , 0.0123 , 0.0305 , ),
+        ('10%-depressing', (27,4,3)): ( 0.0053 , 0.0105 , 0.0216 , ),
+        ('10%-depressing', (36,5,4)): ( 0.0046 , 0.0096 , 0.0183 , ),
+        ('10%-depressing', (55,8,6)): ( 0.0036 , 0.0079 , 0.0139 , ),
 
-        '20%-depressing'+str((17,3,3)): ( 0.0068 , 0.0127 , 0.0325 , ),
-        '20%-depressing'+str((27,4,3)): ( 0.0055 , 0.0106 , 0.0238 , ),
-        '20%-depressing'+str((36,5,4)): ( 0.0047 , 0.0099 , 0.0205 , ),
-        '20%-depressing'+str((55,8,6)): ( 0.0038 , 0.0085 , 0.0155 , ),
+        ('20%-depressing', (17,3,3)): ( 0.0068 , 0.0127 , 0.0325 , ),
+        ('20%-depressing', (27,4,3)): ( 0.0055 , 0.0106 , 0.0238 , ),
+        ('20%-depressing', (36,5,4)): ( 0.0047 , 0.0099 , 0.0205 , ),
+        ('20%-depressing', (55,8,6)): ( 0.0038 , 0.0085 , 0.0155 , ),
     }
 
 
     def __init__(self,
                  convergence=(0,0,0),
                  cf=1000,
-                 endbulb_class="non-depressing",
+                 endbulb_class="tonic",
                  endbulb_pars=None,
                  threshold=-20,
                  debug=True):
@@ -129,8 +129,8 @@ class GBC_Point(GBC_Template):
         self._endbulbs = []
 
 
-        if endbulb_class in ("expsyn", "non-depressing"):
-            endbulb_class = "non-depressing"
+        if endbulb_class in ("expsyn", "non-depressing", "tonic"):
+            endbulb_class = "tonic"
             EndbulbClass = h.ExpSyn
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0, 'tau': 0.2}
@@ -183,7 +183,7 @@ class GBC_Point(GBC_Template):
 
         self.set_endbulb_pars(endbulb_pars)
 
-        weight_key = endbulb_class+str(convergence)
+        weight_key = (endbulb_class, convergence)
         if weight_key in self._default_weights:
             self.set_endbulb_weights(
                 self._default_weights[weight_key]
