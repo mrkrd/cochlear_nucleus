@@ -12,10 +12,10 @@ from brian.library import synapses
 
 class GBCs(object):
     def __init__(self, group=None, cfs=None, convergences=None):
-        assert cfs is not None, "Must give CF list"
+        assert cfs is not None, "You must provide CF list"
         self.cfs = cfs
 
-        assert convergences is not None, "Must provide ANF convergence"
+        assert convergences is not None, "You must provide ANF convergence"
         self.convergences = convergences
 
         if group is None:
@@ -125,9 +125,25 @@ class GBCs(object):
 
 
 def main():
+    import pycat
+    from anf import ANFs
+
     brian.defaultclock.dt = 0.025*ms
 
+    fs = 100e3
+    t = np.arange(0, 0.1, 1/fs)
+    s = np.sin(2 * np.pi * t * 1000)
+    s = pycat.set_dbspl(s, 30)
+
+    ear = pycat.Zilany2009((3,2,1), cf=(80, 8000, 10))
+    anf_raw = ear.run(s, fs)
+
+
+
+    anfs = ANFs(anf_raw)
     gbcs = GBCs(cfs=[100], convergences=[(3,2,1), (3,2,1)])
+
+    gbcs.connect_anfs( anfs )
 
 
     generator = brian.SpikeGeneratorGroup(1, [(0,30*ms),(0,35*ms),(0,40*ms)])
@@ -136,12 +152,12 @@ def main():
     M = brian.StateMonitor(gbcs.group, 'vm', record=True)
 
     net = brian.Network(gbcs.group, generator, connection, M)
+
     net.run(50*ms, report='text', report_period=1) # Go to rest
 
     M.plot()
-    plt.show()
+    brian.show()
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
     main()
