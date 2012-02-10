@@ -9,7 +9,8 @@ import numpy as np
 import brian
 
 class ANFs(object):
-    def __init__(self, anf):
+    def __init__(self, anfs):
+
         ### cfs
         self.cfs = anf['cf']
 

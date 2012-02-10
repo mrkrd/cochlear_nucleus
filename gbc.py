@@ -10,7 +10,7 @@ import brian
 from brian import mV, pF, ms, nS, nA, amp, uS, uohm
 from brian.library import synapses
 
-class GBCs(object):
+class GBCs_RothmanManis2003(object):
     def __init__(self, group=None, cfs=None, convergences=None):
         assert cfs is not None, "You must provide CF list"
         self.cfs = cfs
@@ -141,7 +141,7 @@ def main():
 
 
     anfs = ANFs(anf_raw)
-    gbcs = GBCs(cfs=[100], convergences=[(3,2,1), (3,2,1)])
+    gbcs = GBCs_RothmanManis2003(cfs=[100], convergences=[(3,2,1), (3,2,1)])
 
     gbcs.connect_anfs( anfs )
 
