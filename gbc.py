@@ -5,13 +5,20 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
+import random
 
 import brian
 from brian import mV, pF, ms, nS, nA, amp, uS, uohm
 from brian.library import synapses
 
+from scipy.sparse import lil_matrix
+
+
 class GBCs_RothmanManis2003(object):
     def __init__(self, group=None, cfs=None, convergences=None):
+
+        # TODO: implement self.meta
+
         assert cfs is not None, "You must provide CF list"
         self.cfs = cfs
 
@@ -23,6 +30,29 @@ class GBCs_RothmanManis2003(object):
         else:
             assert False, 'not implemented'
             self.group = group
+
+
+    _default_weights = {
+        ('tonic', (10,2,1)): ( 0.0079 , 0.0147 , 0.0332 , ),
+        ('tonic', (17,3,3)): ( 0.0064 , 0.0126 , 0.0306 , ),
+        ('tonic', (23,0,0)): ( 0.0059 , 0.0000 , 0.0000 , ),
+        ('tonic', (27,4,3)): ( 0.0052 , 0.0101 , 0.0222 , ),
+        ('tonic', (36,5,4)): ( 0.0045 , 0.0097 , 0.0179 , ),
+        ('tonic', (47,0,0)): ( 0.0041 , 0.0000 , 0.0000 , ),
+        ('tonic', (55,8,6)): ( 0.0035 , 0.0073 , 0.0131 , ),
+
+        ('yang2009impact', (36,5,4)): ( 0.0111 , 0.0128 , 0.0614 , ),
+
+        ('10%-depressing', (17,3,3)): ( 0.0066 , 0.0123 , 0.0305 , ),
+        ('10%-depressing', (27,4,3)): ( 0.0053 , 0.0105 , 0.0216 , ),
+        ('10%-depressing', (36,5,4)): ( 0.0046 , 0.0096 , 0.0183 , ),
+        ('10%-depressing', (55,8,6)): ( 0.0036 , 0.0079 , 0.0139 , ),
+
+        ('20%-depressing', (17,3,3)): ( 0.0068 , 0.0127 , 0.0325 , ),
+        ('20%-depressing', (27,4,3)): ( 0.0055 , 0.0106 , 0.0238 , ),
+        ('20%-depressing', (36,5,4)): ( 0.0047 , 0.0099 , 0.0205 , ),
+        ('20%-depressing', (55,8,6)): ( 0.0038 , 0.0085 , 0.0155 , ),
+    }
 
 
 
@@ -123,6 +153,36 @@ class GBCs_RothmanManis2003(object):
         return group
 
 
+    def connect_anfs(self, anfs, weights=None):
+
+        weight = 1
+
+        types = ('hsr', 'msr', 'lsr')
+
+        convergences = []
+        for c in self.convergences:
+            convergences.append( dict( zip( types, c ) ) )
+
+        ws = np.zeros( (len(anfs.group), len(self.group)) )
+
+        for cf,convergence,col in zip(self.cfs, convergences, ws.T):
+            for typ in types:
+
+                # Indexes of all available ANFs for a given CF nad TYPE
+                idxs = np.where(
+                    (anfs.meta['cf'] == cf) &
+                    (anfs.meta['type'] == typ)
+                )[0]
+
+                idx = random.sample( idxs, convergence[typ] )
+
+                col[idx] = weight
+
+
+        print ws
+        ws_sparse = lil_matrix( ws )
+        exit()
+
 
 def main():
     import pycat
@@ -135,13 +195,14 @@ def main():
     s = np.sin(2 * np.pi * t * 1000)
     s = pycat.set_dbspl(s, 30)
 
-    ear = pycat.Zilany2009((3,2,1), cf=(80, 8000, 10))
+    ear = pycat.Zilany2009((3,2,1), cf=(80, 8000, 2))
     anf_raw = ear.run(s, fs)
 
 
 
     anfs = ANFs(anf_raw)
-    gbcs = GBCs_RothmanManis2003(cfs=[100], convergences=[(3,2,1), (3,2,1)])
+    cfs = np.unique(anfs.cfs)
+    gbcs = GBCs_RothmanManis2003(cfs=cfs, convergences=[(3,2,1), (3,2,1)])
 
     gbcs.connect_anfs( anfs )
 

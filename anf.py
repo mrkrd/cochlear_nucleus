@@ -11,18 +11,24 @@ import brian
 class ANFs(object):
     def __init__(self, anfs):
 
+
+        p = list(anfs.dtype.names)
+        p.remove('spikes')
+        self.meta = anfs[p]
+
+
         ### cfs
-        self.cfs = anf['cf']
+        self.cfs = self.meta['cf']
 
 
         ### anf_type
-        self.neuron_type = anf['type']
+        self.neuron_types = self.meta['type']
 
 
         ### spikes
         times = []
         indices = []
-        for i,spikes in enumerate(anf['spikes']):
+        for i,spikes in enumerate(anfs['spikes']):
             times.append( spikes / 1e3)
             indices.append( np.ones(len(spikes)) * i )
 
@@ -32,14 +38,12 @@ class ANFs(object):
 
 
         self.group = brian.SpikeGeneratorGroup(
-            len(anf),
+            len(anfs),
             spiketimes=spiketimes
         )
 
 
-
-        self.magic
-
+        self.brian_objects = [self.group]
 
 
 

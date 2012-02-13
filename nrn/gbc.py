@@ -11,34 +11,8 @@ import neuron
 from neuron import h
 
 
-class GBC_Template(object):
 
-    def _Tf(self, q10, ref_temp=22):
-        return q10 ** ((h.celsius - ref_temp)/10.0)
-
-
-    def get_spikes(self):
-        assert h.t != 0, "Time is 0 (did you run the simulation already?)"
-
-        train = np.array( [(np.array(self._spikes), h.t, self.cf, 'gbc')],
-                          dtype=[('spikes', np.ndarray),
-                                 ('duration', float),
-                                 ('cf', float),
-                                 ('type', '|S3')]
-        )
-        return train
-
-
-
-    def _nstomho(self, ns, area):
-        """
-        Rothman/Manis helper function.
-        """
-        return 1e-9 * ns / area
-
-
-
-class GBC_Point(GBC_Template):
+class GBC_Point(object):
     _default_weights = {
         ('tonic', (10,2,1)): ( 0.0079 , 0.0147 , 0.0332 , ),
         ('tonic', (17,3,3)): ( 0.0064 , 0.0126 , 0.0306 , ),
@@ -116,6 +90,30 @@ class GBC_Point(GBC_Template):
         self._probe.record(self._spikes)
 
 
+
+
+    def _Tf(self, q10, ref_temp=22):
+        return q10 ** ((h.celsius - ref_temp)/10.0)
+
+
+    def get_spikes(self):
+        assert h.t != 0, "Time is 0 (did you run the simulation already?)"
+
+        train = np.array( [(np.array(self._spikes), h.t, self.cf, 'gbc')],
+                          dtype=[('spikes', np.ndarray),
+                                 ('duration', float),
+                                 ('cf', float),
+                                 ('type', '|S3')]
+        )
+        return train
+
+
+
+    def _nstomho(self, ns, area):
+        """
+        Rothman/Manis helper function.
+        """
+        return 1e-9 * ns / area
 
 
 
