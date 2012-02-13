@@ -15,15 +15,17 @@ from scipy.sparse import lil_matrix
 
 
 class GBCs_RothmanManis2003(object):
-    def __init__(self, group=None, cfs=None, convergences=None):
+    def __init__(self, cfs, convergences, group=None, endbulb_classes='tonic'):
 
         # TODO: implement self.meta
 
-        assert cfs is not None, "You must provide CF list"
-        self.cfs = cfs
+        assert len(cfs) == len(convergences)
 
-        assert convergences is not None, "You must provide ANF convergence"
+        self.cfs = cfs
         self.convergences = convergences
+
+        if isinstance(endbulb_classes, str):
+            self.endbulb_classes = [endbulb_classes for i in self.cfs]
 
         if group is None:
             self.group = self._make_gbcs(len(cfs))
@@ -155,8 +157,6 @@ class GBCs_RothmanManis2003(object):
 
     def connect_anfs(self, anfs, weights=None):
 
-        weight = 1
-
         types = ('hsr', 'msr', 'lsr')
 
         convergences = []
@@ -165,7 +165,10 @@ class GBCs_RothmanManis2003(object):
 
         ws = np.zeros( (len(anfs.group), len(self.group)) )
 
-        for cf,convergence,col in zip(self.cfs, convergences, ws.T):
+        for cf,convergence,endbulb_class,col in zip(self.cfs,
+                                                    convergences,
+                                                    self.endbulb_classes,
+                                                    ws.T):
             for typ in types:
 
                 # Indexes of all available ANFs for a given CF nad TYPE
@@ -176,12 +179,39 @@ class GBCs_RothmanManis2003(object):
 
                 idx = random.sample( idxs, convergence[typ] )
 
-                col[idx] = weight
+                col[idx] = self._calc_synaptic_weight(
+                    endbulb_class=endbulb_class,
+                    convergence=convergence,
+                    anf_type=typ,
+                    weights=weights
+                )
 
 
         print ws
         ws_sparse = lil_matrix( ws )
         exit()
+
+
+    def _calc_synaptic_weight(self, endbulb_class, convergence, anf_type, weights):
+
+        anf_type_idx = {'hsr': 0, 'msr': 1, 'lsr': 2}[anf_type]
+        convergence = (convergence['hsr'], convergence['msr'], convergence['lsr'])
+
+        ### Use precalculated weights
+        if weights is None:
+            ws = self._default_weights[ (endbulb_class, convergence) ]
+            w = ws[ anf_type_idx ]
+
+        elif isinstance(weights, float) or isinstance(weights, int):
+            w = weights
+
+        elif isinstance(weights, tuple):
+            assert len(weights) == 3
+            w = weights[anf_type_idx]
+
+        return w
+
+
 
 
 def main():
@@ -204,7 +234,7 @@ def main():
     cfs = np.unique(anfs.cfs)
     gbcs = GBCs_RothmanManis2003(cfs=cfs, convergences=[(3,2,1), (3,2,1)])
 
-    gbcs.connect_anfs( anfs )
+    gbcs.connect_anfs( anfs, weights=(0.3, 0.2, 0.1))
 
 
     generator = brian.SpikeGeneratorGroup(1, [(0,30*ms),(0,35*ms),(0,40*ms)])
