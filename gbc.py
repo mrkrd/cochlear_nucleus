@@ -147,7 +147,7 @@ class GBCs_RothmanManis2003(object):
 
         group = brian.NeuronGroup(N=num,
                                   model=eqs,
-                                  threshold=brian.EmpiricalThreshold(threshold=-10*mV, refractory=0.5*ms),
+                                  threshold=brian.EmpiricalThreshold(threshold=-10*mV, refractory=0.7*ms),
                                   implicit=True)
 
         ### Set initial conditions
@@ -236,7 +236,6 @@ class GBCs_RothmanManis2003(object):
                                          ('duration', float),
                                          ('cf', float),
                                          ('type', '|S3')])
-
         return trains
 
 
