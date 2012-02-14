@@ -7,6 +7,7 @@ __author__ = "Marek Rudnicki"
 import numpy as np
 
 import brian
+from brian import second
 
 class ANFs(object):
     def __init__(self, anfs):
@@ -29,17 +30,17 @@ class ANFs(object):
         times = []
         indices = []
         for i,spikes in enumerate(anfs['spikes']):
-            times.append( spikes / 1e3)
+            times.append( spikes )
             indices.append( np.ones(len(spikes)) * i )
 
-        times = np.concatenate( times )
+
         indices = np.concatenate( indices )
-        spiketimes = np.vstack( (indices, times) ).T
+        times = np.concatenate( times ) * second
 
 
         self.group = brian.SpikeGeneratorGroup(
             len(anfs),
-            spiketimes=spiketimes
+            spiketimes=(indices, times)
         )
 
 

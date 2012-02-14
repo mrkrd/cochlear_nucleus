@@ -8,7 +8,7 @@ import numpy as np
 import random
 
 import brian
-from brian import mV, pF, ms, nS, nA, amp, uS, uohm
+from brian import mV, pF, ms, nS, nA, amp, uS, uohm, second
 from brian.library import synapses
 
 from scipy.sparse import lil_matrix
@@ -32,6 +32,11 @@ class GBCs_RothmanManis2003(object):
         else:
             assert False, 'not implemented'
             self.group = group
+
+
+        self._spike_monitor = brian.SpikeMonitor(self.group)
+
+        self.brian_objects = [self.group, self._spike_monitor]
 
 
     _default_weights = {
@@ -140,7 +145,10 @@ class GBCs_RothmanManis2003(object):
         eqs += syn
 
 
-        group = brian.NeuronGroup(num, eqs, implicit=True)
+        group = brian.NeuronGroup(N=num,
+                                  model=eqs,
+                                  threshold=brian.EmpiricalThreshold(threshold=-10*mV, refractory=0.5*ms),
+                                  implicit=True)
 
         ### Set initial conditions
         group.vm = El
@@ -187,9 +195,13 @@ class GBCs_RothmanManis2003(object):
                 )
 
 
-        print ws
-        ws_sparse = lil_matrix( ws )
-        exit()
+        ws_sparse = lil_matrix( ws ) * uS
+        connection = brian.Connection(anfs.group, self.group, 'ge')
+        connection.connect( anfs.group, self.group, ws_sparse )
+
+        self.brian_objects.append(connection)
+
+        print self.brian_objects
 
 
     def _calc_synaptic_weight(self, endbulb_class, convergence, anf_type, weights):
@@ -213,6 +225,23 @@ class GBCs_RothmanManis2003(object):
 
 
 
+    def get_spikes(self):
+        spiketimes = self._spike_monitor.spiketimes
+
+        trains = []
+        for i,spikes in spiketimes.items():
+            trains.append( (spikes, self.group.clock.t, self.cfs[i], 'gbc') )
+
+        trains = np.array(trains, dtype=[('spikes', np.ndarray),
+                                         ('duration', float),
+                                         ('cf', float),
+                                         ('type', '|S3')])
+
+        return trains
+
+
+
+
 
 def main():
     import pycat
@@ -220,8 +249,10 @@ def main():
 
     brian.defaultclock.dt = 0.025*ms
 
+    tmax = 0.05                 # [s]
+
     fs = 100e3
-    t = np.arange(0, 0.1, 1/fs)
+    t = np.arange(0, tmax, 1/fs)
     s = np.sin(2 * np.pi * t * 1000)
     s = pycat.set_dbspl(s, 30)
 
@@ -229,22 +260,20 @@ def main():
     anf_raw = ear.run(s, fs)
 
 
-
     anfs = ANFs(anf_raw)
     cfs = np.unique(anfs.cfs)
     gbcs = GBCs_RothmanManis2003(cfs=cfs, convergences=[(3,2,1), (3,2,1)])
 
-    gbcs.connect_anfs( anfs, weights=(0.3, 0.2, 0.1))
+    gbcs.connect_anfs( anfs, weights=(0.05, 0.05, 0.05))
 
-
-    generator = brian.SpikeGeneratorGroup(1, [(0,30*ms),(0,35*ms),(0,40*ms)])
-    connection = brian.Connection(generator, gbcs.group, 'ge', weight=0.5*uS)
 
     M = brian.StateMonitor(gbcs.group, 'vm', record=True)
 
-    net = brian.Network(gbcs.group, generator, connection, M)
+    net = brian.Network(gbcs.brian_objects, anfs.brian_objects, M)
 
-    net.run(50*ms, report='text', report_period=1) # Go to rest
+    net.run(tmax*second, report='text', report_period=1) # Go to rest
+
+    print gbcs.get_spikes()
 
     M.plot()
     brian.show()
