@@ -75,27 +75,35 @@ class GBCs_RothmanManis2003(object):
         zss = 0.5 # steady state inactivation of glt
         celsius = 37. # temperature
         q10 = 3.**((celsius - 22)/10.)
+        T10 = 10.**((celsius - 22)/10.)
 
         def Tf(q10, ref_temp=22):
             return q10 ** ((celsius - ref_temp)/10.0)
 
-        gnabar = Tf(1.4) * 1000 * nS
-        gkhtbar = Tf(1.4) * 150 * nS
-        gkltbar = Tf(1.4) * 200 * nS
-        ghbar = Tf(1.4) * 20 * nS
-        gl = Tf(1.4) * 2 * nS
+
+        q10_gbar = 1
+
+        gnabar = Tf(q10_gbar) * 3000 * nS
+        gkhtbar = Tf(q10_gbar) * 150 * nS
+        gkltbar = Tf(q10_gbar) * 200 * nS
+        ghbar = Tf(q10_gbar) * 20 * nS
+        gl = Tf(q10_gbar) * 2 * nS
 
 
-        # Classical Na channel
+        # Rothman 1993 Na channel
         eqs_na="""
         ina = gnabar*m**3*h*(ENa-vm) : amp
-        dm/dt=q10*(minf-m)/mtau : 1
-        dh/dt=q10*(hinf-h)/htau : 1
-        minf = 1./(1+exp(-(vu + 38.) / 7.)) : 1
-        hinf = 1./(1+exp((vu + 65.) / 6.)) : 1
-        mtau =  ((10. / (5*exp((vu+60.) / 18.) + 36.*exp(-(vu+60.) / 25.))) + 0.04)*ms : ms
-        htau =  ((100. / (7*exp((vu+60.) / 11.) + 10.*exp(-(vu+60.) / 25.))) + 0.6)*ms : ms
+
+        dm/dt = malpha * (1. - m) - mbeta * m : 1
+        dh/dt = halpha * (1. - h) - hbeta * h : 1
+
+        malpha = (0.36 * q10 * (vu+49.)) / (1. - exp(-(vu+49.)/3.)) /ms : 1/ms
+        mbeta = (-0.4 * q10 * (vu+58.)) / (1. - exp((vu+58)/20.)) /ms : 1/ms
+
+        halpha = 2.4*q10 / (1. + exp((vu+68.)/3.)) /ms  +  0.8*T10 / (1. + exp(vu + 61.3)) /ms : 1/ms
+        hbeta = 3.6*q10 / (1. + exp(-(vu+21.)/10.)) /ms : 1/ms
         """
+
 
         # KHT channel (delayed-rectifier K+)
         eqs_kht="""
@@ -147,14 +155,14 @@ class GBCs_RothmanManis2003(object):
 
         group = brian.NeuronGroup(N=num,
                                   model=eqs,
-                                  threshold=brian.EmpiricalThreshold(threshold=-10*mV, refractory=0.7*ms),
+                                  threshold=brian.EmpiricalThreshold(threshold=-10*mV, refractory=0.5*ms),
                                   implicit=True)
 
         ### Set initial conditions
         group.vm = El
         group.r = 1. / (1+ np.exp((El/mV + 76.) / 7.))
-        group.m = 1./(1+np.exp(-(El/mV + 38.) / 7.))
-        group.h = 1./(1+np.exp((El/mV + 65.) / 6.))
+        group.m = group.malpha / (group.malpha + group.mbeta)
+        group.h = group.halpha / (group.halpha + group.halpha)
         group.w = (1. / (1 + np.exp(-(El/mV + 48.) / 6.)))**0.25
         group.z = zss + ((1.-zss) / (1 + np.exp((El/mV + 71.) / 10.)))
         group.n = (1 + np.exp(-(El/mV + 15) / 5.))**-0.5
