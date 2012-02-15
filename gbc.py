@@ -81,9 +81,9 @@ class GBCs_RothmanManis2003(object):
             return q10 ** ((celsius - ref_temp)/10.0)
 
 
-        q10_gbar = 1
+        q10_gbar = 1.5
 
-        gnabar = Tf(q10_gbar) * 3000 * nS
+        gnabar = Tf(q10_gbar) * 2500 * nS
         gkhtbar = Tf(q10_gbar) * 150 * nS
         gkltbar = Tf(q10_gbar) * 200 * nS
         ghbar = Tf(q10_gbar) * 20 * nS

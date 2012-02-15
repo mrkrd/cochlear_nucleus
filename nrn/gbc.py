@@ -47,6 +47,9 @@ class GBC_Point(object):
         if debug:
             print "GBC temperature:", h.celsius, "C"
 
+
+        totcap = 12
+        soma_area = totcap * 1e-6 / 1
         # soma_area = 2500        # um2
         # Lstd = np.sqrt(soma_area/np.pi)
         Lstd = 20
@@ -66,13 +69,13 @@ class GBC_Point(object):
         self.soma.ek = -77
         self.soma.ena = 50
 
-        q10 = 1.4
+        q10 = 1.5
         for seg in self.soma:
-            seg.na_rothman93.gnabar = self._Tf(q10) * 0.35
-            seg.kht.gkhtbar = self._Tf(q10) * 0.0125 #self._nstomho(150, soma_area)
-            seg.klt.gkltbar = self._Tf(q10) * 0.0167 #self._nstomho(200, soma_area)
-            seg.ih.ghbar = self._Tf(q10) * 0.00167 #self._nstomho(20, soma_area)
-            seg.pas.g = self._Tf(q10) * 0.000167 #self._nstomho(2, soma_area)
+            seg.na_rothman93.gnabar = self._Tf(q10) * self._nstomho(2500, soma_area)
+            seg.kht.gkhtbar = self._Tf(q10) * self._nstomho(150, soma_area)
+            seg.klt.gkltbar = self._Tf(q10) * self._nstomho(200, soma_area)
+            seg.ih.ghbar = self._Tf(q10) * self._nstomho(20, soma_area)
+            seg.pas.g = self._Tf(q10) * self._nstomho(2, soma_area)
             seg.pas.e = -65
 
 
@@ -99,7 +102,7 @@ class GBC_Point(object):
     def get_spikes(self):
         assert h.t != 0, "Time is 0 (did you run the simulation already?)"
 
-        train = np.array( [(np.array(self._spikes), h.t, self.cf, 'gbc')],
+        train = np.array( [(np.array(self._spikes)*1e-3, h.t, self.cf, 'gbc')],
                           dtype=[('spikes', np.ndarray),
                                  ('duration', float),
                                  ('cf', float),
@@ -113,7 +116,9 @@ class GBC_Point(object):
         """
         Rothman/Manis helper function.
         """
-        return 1e-9 * ns / area
+        mho = 1e-9 * ns / area
+        # print ns, mho
+        return mho
 
 
 
@@ -272,7 +277,7 @@ class GBC_Point(object):
             assert bulb.has_key('spikes'), "***** Not all endbulbs loaded with ANF spikes! *****"
 
             for sp in bulb['spikes']:
-                bulb['con'].event(float(sp))
+                bulb['con'].event(float(sp)*1e3)
 
 
 
