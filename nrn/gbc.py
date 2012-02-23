@@ -102,7 +102,7 @@ class GBC_Point(object):
     def get_spikes(self):
         assert h.t != 0, "Time is 0 (did you run the simulation already?)"
 
-        train = np.array( [(np.array(self._spikes)*1e-3, h.t, self.cf, 'gbc')],
+        train = np.array( [(np.array(self._spikes)*1e-3, h.t*1e-3, self.cf, 'gbc')],
                           dtype=[('spikes', np.ndarray),
                                  ('duration', float),
                                  ('cf', float),
