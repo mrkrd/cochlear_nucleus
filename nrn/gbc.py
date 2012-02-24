@@ -300,12 +300,12 @@ def main():
 
 
     anf = [
-        (np.array([10,20]), 'hsr', 1000, 100),
-        (np.array([30,40]), 'hsr', 1000, 100),
-        (np.array([50,60]), 'hsr', 3333, 100),
-        (np.array([70,80]), 'msr', 1000, 100),
-        (np.array([90,00]), 'msr', 2222, 100),
-        (np.array([60,50]), 'lsr', 1000, 100)
+        (np.array([10,20])*1e-3, 'hsr', 1000, 100e-3),
+        (np.array([30,40])*1e-3, 'hsr', 1000, 100e-3),
+        (np.array([50,60])*1e-3, 'hsr', 3333, 100e-3),
+        (np.array([70,80])*1e-3, 'msr', 1000, 100e-3),
+        (np.array([90,100])*1e-3, 'msr', 2222, 100e-3),
+        (np.array([60,50])*1e-3, 'lsr', 1000, 100e-3)
     ]
     anf = np.rec.array(anf, dtype=[('spikes', np.ndarray),
                                    ('type', '|S3'),
@@ -336,6 +336,12 @@ def main():
     print
     print "Output spike trains"
     print gbc.get_spikes()
+    print
+    print "Rate:", th.stats.rate(gbc.get_spikes())
+    print
+
+
+
     a = gbc.get_spikes()
     b = gbc.get_spikes()
 
