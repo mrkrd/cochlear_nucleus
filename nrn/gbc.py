@@ -259,15 +259,15 @@ class GBC_Point(object):
     def load_anf_trains(self, anf):
 
         hsr_idx = np.where(
-            (anf['type']=='hsr') & (anf['cf']==self.cf)
+            (anf['type'] == 'hsr') & (anf['cf'] == self.cf)
         )[0].tolist()
 
         msr_idx = np.where(
-            (anf['type']=='msr') & (anf['cf']==self.cf)
+            (anf['type'] == 'msr') & (anf['cf'] == self.cf)
         )[0].tolist()
 
         lsr_idx = np.where(
-            (anf['type']=='lsr') & (anf['cf']==self.cf)
+            (anf['type'] == 'lsr') & (anf['cf'] == self.cf)
         )[0].tolist()
 
 
