@@ -5,8 +5,6 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-import thorns as th
-
 import neuron
 from neuron import h
 
@@ -377,4 +375,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import marlib.thorns as th
+
     main()
