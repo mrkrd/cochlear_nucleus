@@ -15,22 +15,12 @@ from scipy.sparse import lil_matrix
 
 
 class GBCs_RothmanManis2003(object):
-    def __init__(self, cfs, convergences, group=None, endbulb_classes='tonic'):
-
-        # TODO: implement self.meta
-
-        assert len(cfs) == len(convergences)
-
-        self.cfs = cfs
-        self.convergences = convergences
-
-        if isinstance(endbulb_classes, str):
-            self.endbulb_classes = [endbulb_classes for i in self.cfs]
+    def __init__(self, group_size, group=None):
 
         if group is None:
-            self.group = self._make_gbcs(len(cfs))
+            self.group = self._make_gbcs(group_size)
         else:
-            assert False, 'not implemented'
+            raise RuntimeError, 'not implemented'
             self.group = group
 
 
@@ -193,51 +183,84 @@ class GBCs_RothmanManis2003(object):
         return group
 
 
-    def connect_anfs(self, anfs, weights=None):
+    def connect_anfs(
+            self,
+            anfs,
+            cfs,
+            convergence,
+            weight=None,
+            endbulb_class='tonic',
+            recycle_anfs=True):
 
-        types = ('hsr', 'msr', 'lsr')
+        anf_types = {'hsr':0, 'msr':1, 'lsr':2}
 
-        convergences = []
-        for c in self.convergences:
-            convergences.append( dict( zip( types, c ) ) )
 
-        ws = np.zeros( (len(anfs.group), len(self.group)) )
+        assert recycle_anfs, "Not implemented"
 
-        for cf,convergence,endbulb_class,col in zip(self.cfs,
-                                                    convergences,
-                                                    self.endbulb_classes,
-                                                    ws.T):
-            for typ in types:
 
-                # Indexes of all available ANFs for a given CF nad TYPE
-                idxs = np.where(
-                    (anfs.meta['cf'] == cf) &
+        assert len(cfs) == len(self.group)
+        self.cfs = cfs
+
+
+        if isinstance(endbulb_class, str):
+            endbulb_classes = [endbulb_class] * len(self.group)
+        else:
+            assert len(endbulb_class) == len(self.group)
+            endbulb_classes = endbulb_class
+
+
+        if isinstance(weight, tuple):
+            assert len(weight) == 3
+            weights = [weight] * len(self.group)
+        else:
+            assert len(weight) == len(self.group)
+            weights = weight
+
+
+        if isinstance(convergence, tuple):
+            assert len(convergence) == 3
+            convergences = [convergence] * len(self.group)
+        else:
+            assert len(convergence) == len(self.group)
+            convergences = convergence
+
+
+        connection_matrix = np.zeros( (len(anfs.group), len(self.group)) )
+
+        for gbc_idx in range(len(self.group)):
+            for typ,i in anf_types.items():
+
+                # Indexes of all matching ANFs for a given CF and TYPE
+                anf_idxs = np.where(
+                    (anfs.meta['cf'] == self.cfs[gbc_idx]) &
                     (anfs.meta['type'] == typ)
                 )[0]
 
-                idx = random.sample( idxs, convergence[typ] )
+                anf_idx = random.sample(
+                    anf_idxs,
+                    convergences[gbc_idx][i]
+                )
 
-                col[idx] = self._calc_synaptic_weight(
-                    endbulb_class=endbulb_class,
-                    convergence=convergence,
+                connection_matrix[anf_idx,gbc_idx] = self._calc_synaptic_weight(
+                    endbulb_class=endbulb_classes[gbc_idx],
+                    convergence=convergences[gbc_idx],
                     anf_type=typ,
-                    weights=weights
+                    weights=weights[gbc_idx]
                 )
 
 
-        ws_sparse = lil_matrix( ws ) * uS
+        ws_sparse = lil_matrix( connection_matrix ) * uS
         connection = brian.Connection(anfs.group, self.group, 'ge')
         connection.connect( anfs.group, self.group, ws_sparse )
 
         self.brian_objects.append(connection)
 
-        print self.brian_objects
+
 
 
     def _calc_synaptic_weight(self, endbulb_class, convergence, anf_type, weights):
 
         anf_type_idx = {'hsr': 0, 'msr': 1, 'lsr': 2}[anf_type]
-        convergence = (convergence['hsr'], convergence['msr'], convergence['lsr'])
 
         ### Use precalculated weights
         if weights is None:
@@ -250,6 +273,9 @@ class GBCs_RothmanManis2003(object):
         elif isinstance(weights, tuple):
             assert len(weights) == 3
             w = weights[anf_type_idx]
+
+        else:
+            raise RuntimeError, "Unknown weight format."
 
         return w
 
@@ -273,7 +299,7 @@ class GBCs_RothmanManis2003(object):
 
 
 def main():
-    import pycat
+    import cochlea
     from anf import ANFs
 
     brian.defaultclock.dt = 0.025*ms
@@ -283,17 +309,22 @@ def main():
     fs = 100e3
     t = np.arange(0, tmax, 1/fs)
     s = np.sin(2 * np.pi * t * 1000)
-    s = pycat.set_dbspl(s, 30)
+    s = cochlea.set_dbspl(s, 30)
 
-    ear = pycat.Zilany2009((3,2,1), cf=(80, 8000, 2))
-    anf_raw = ear.run(s, fs)
+    ear = cochlea.Zilany2009((3,2,1), cf=(80, 8000, 2))
+    anf_raw = ear.run(s, fs, seed=0)
 
 
     anfs = ANFs(anf_raw)
     cfs = np.unique(anfs.cfs)
-    gbcs = GBCs_RothmanManis2003(cfs=cfs, convergences=[(3,2,1), (3,2,1)])
+    gbcs = GBCs_RothmanManis2003(len(cfs))
 
-    gbcs.connect_anfs( anfs, weights=(0.05, 0.05, 0.05))
+    gbcs.connect_anfs(
+        anfs,
+        cfs=cfs,
+        convergence=(3,2,1),
+        weight=(0.05, 0.05, 0.05),
+    )
 
 
     M = brian.StateMonitor(gbcs.group, 'vm', record=True)
