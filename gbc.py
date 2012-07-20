@@ -15,13 +15,48 @@ from scipy.sparse import lil_matrix
 
 
 class GBCs_RothmanManis2003(object):
-    def __init__(self, group_size, group=None):
+    def __init__(
+            self,
+            cfs,
+            convergences,
+            endbulb_class='tonic',
+            celsius = 37.,
+            group=None):
+
+
+
+
+        self._cfs = cfs
+        self._celsius = celsius
+
+
+        if isinstance(convergences, tuple):
+            assert len(convergences) == 3
+            self._convergences = [convergences] * len(self._cfs)
+        else:
+            assert len(convergence) == len(self._cfs)
+            self._convergences = convergences
+
+
+
+        if isinstance(endbulb_class, str):
+            self._endbulb_classes = [endbulb_class] * len(self._cfs)
+        else:
+            assert len(endbulb_class) == len(self._cfs)
+            self._endbulb_classes = endbulb_class
+
+
+
+
 
         if group is None:
-            self.group = self._make_gbcs(group_size)
+            self.group = self._make_gbcs(len(cfs))
         else:
             raise RuntimeError, 'not implemented'
             self.group = group
+
+
+
 
 
         self._spike_monitor = brian.SpikeMonitor(self.group)
@@ -85,12 +120,12 @@ class GBCs_RothmanManis2003(object):
 
         nf = 0.85 # proportion of n vs p kinetics
         zss = 0.5 # steady state inactivation of glt
-        celsius = 37. # temperature
-        q10 = 3.**((celsius - 22)/10.)
-        T10 = 10.**((celsius - 22)/10.)
+
+        q10 = 3.**((self._celsius - 22)/10.)
+        T10 = 10.**((self._celsius - 22)/10.)
 
         def Tf(q10, ref_temp=22):
-            return q10 ** ((celsius - ref_temp)/10.0)
+            return q10 ** ((self._celsius - ref_temp)/10.0)
 
 
         q10_gbar = 1.5
@@ -165,10 +200,20 @@ class GBCs_RothmanManis2003(object):
         eqs += syn
 
 
-        group = brian.NeuronGroup(N=num,
-                                  model=eqs,
-                                  threshold=brian.EmpiricalThreshold(threshold=-20*mV, refractory=0.5*ms),
-                                  implicit=True)
+
+        if self._celsius < 37:
+            refractory = 0.7*ms
+        else:
+            refractory = 0.5*ms
+
+
+        group = brian.NeuronGroup(
+            N=num,
+            model=eqs,
+            threshold=brian.EmpiricalThreshold(threshold=-20*mV, refractory=refractory),
+            implicit=True
+        )
+
 
         ### Set initial conditions
         group.vm = El
@@ -183,69 +228,49 @@ class GBCs_RothmanManis2003(object):
         return group
 
 
-    def connect_anfs(
-            self,
-            anfs,
-            cfs,
-            convergence,
-            weight=None,
-            endbulb_class='tonic',
-            recycle_anfs=True):
+    def connect_anfs(self, anfs, weights, recycle=True):
+
 
         anf_types = {'hsr':0, 'msr':1, 'lsr':2}
 
 
-        assert recycle_anfs, "Not implemented"
-
-
-        assert len(cfs) == len(self.group)
-        self.cfs = cfs
-
-
-        if isinstance(endbulb_class, str):
-            endbulb_classes = [endbulb_class] * len(self.group)
+        if isinstance(weights, tuple):
+            assert len(weights) == 3
+            self._weights = [weights] * len(self.group)
         else:
-            assert len(endbulb_class) == len(self.group)
-            endbulb_classes = endbulb_class
+            assert len(weights) == len(self.group)
+            self._weights = weights
 
-
-        if isinstance(weight, tuple):
-            assert len(weight) == 3
-            weights = [weight] * len(self.group)
-        else:
-            assert len(weight) == len(self.group)
-            weights = weight
-
-
-        if isinstance(convergence, tuple):
-            assert len(convergence) == 3
-            convergences = [convergence] * len(self.group)
-        else:
-            assert len(convergence) == len(self.group)
-            convergences = convergence
 
 
         connection_matrix = np.zeros( (len(anfs.group), len(self.group)) )
+
+        active_anfs = np.ones(len(anfs.group), dtype=bool)
+
 
         for gbc_idx in range(len(self.group)):
             for typ,i in anf_types.items():
 
                 # Indexes of all matching ANFs for a given CF and TYPE
                 anf_idxs = np.where(
-                    (anfs.meta['cf'] == self.cfs[gbc_idx]) &
-                    (anfs.meta['type'] == typ)
+                    (anfs.meta['cf'] == self._cfs[gbc_idx]) &
+                    (anfs.meta['type'] == typ) &
+                    active_anfs
                 )[0]
 
                 anf_idx = random.sample(
                     anf_idxs,
-                    convergences[gbc_idx][i]
+                    self._convergences[gbc_idx][i]
                 )
 
+                if not recycle:
+                    active_anfs[anf_idx] = False
+
                 connection_matrix[anf_idx,gbc_idx] = self._calc_synaptic_weight(
-                    endbulb_class=endbulb_classes[gbc_idx],
-                    convergence=convergences[gbc_idx],
+                    endbulb_class=self._endbulb_classes[gbc_idx],
+                    convergence=self._convergences[gbc_idx],
                     anf_type=typ,
-                    weights=weights[gbc_idx]
+                    weights=self._weights[gbc_idx]
                 )
 
 
@@ -259,6 +284,8 @@ class GBCs_RothmanManis2003(object):
 
 
     def _calc_synaptic_weight(self, endbulb_class, convergence, anf_type, weights):
+
+        assert endbulb_class == 'tonic', "Only tonic synapse is implemented."
 
         anf_type_idx = {'hsr': 0, 'msr': 1, 'lsr': 2}[anf_type]
 
@@ -281,17 +308,21 @@ class GBCs_RothmanManis2003(object):
 
 
 
-    def get_spikes(self):
+    def get_trains(self):
         spiketimes = self._spike_monitor.spiketimes
 
         trains = []
         for i,spikes in spiketimes.items():
-            trains.append( (spikes, self.group.clock.t, self.cfs[i], 'gbc') )
+            trains.append( (spikes, self.group.clock.t, self._cfs[i], 'gbc') )
 
-        trains = np.array(trains, dtype=[('spikes', np.ndarray),
-                                         ('duration', float),
-                                         ('cf', float),
-                                         ('type', '|S3')])
+        trains = np.array(
+            trains,
+            dtype=[('spikes', np.ndarray),
+                   ('duration', float),
+                   ('cf', float),
+                   ('type', '|S3')]
+        )
+
         return trains
 
 
@@ -317,21 +348,35 @@ def main():
 
     anfs = ANFs(anf_raw)
     cfs = np.unique(anfs.cfs)
-    gbcs = GBCs_RothmanManis2003(len(cfs))
+    gbcs = GBCs_RothmanManis2003(
+        cfs=cfs,
+        convergence=(3,2,1),
+    )
 
     gbcs.connect_anfs(
         anfs,
-        cfs=cfs,
-        convergence=(3,2,1),
         weight=(0.05, 0.05, 0.05),
+        recycle=False
     )
 
 
-    M = brian.StateMonitor(gbcs.group, 'vm', record=True)
+    M = brian.StateMonitor(
+        gbcs.group,
+        'vm',
+        record=True
+    )
 
-    net = brian.Network(gbcs.brian_objects, anfs.brian_objects, M)
+    net = brian.Network(
+        gbcs.brian_objects,
+        anfs.brian_objects,
+        M
+    )
 
-    net.run(tmax*second, report='text', report_period=1) # Go to rest
+    net.run(
+        tmax*second,
+        report='text',
+        report_period=1
+    )
 
     print gbcs.get_spikes()
 
