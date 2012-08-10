@@ -71,10 +71,6 @@ class GBC_Point(object):
             print "GBC temperature:", h.celsius, "C"
 
 
-        totcap = 12
-        soma_area = totcap * 1e-6 / 1
-        # soma_area = 2500        # um2
-        # Lstd = np.sqrt(soma_area/np.pi)
         Lstd = 20
 
         self.soma = h.Section()
@@ -91,16 +87,16 @@ class GBC_Point(object):
         self.soma.cm = 0.9
         self.soma.ek = -77
         self.soma.ena = 50
+        self.soma.e_pas = -65
+
 
         q10 = 1.5
         for seg in self.soma:
-            seg.na_rothman93.gnabar = self._Tf(q10) * self._nstomho(2500, soma_area)
-            seg.kht.gkhtbar = self._Tf(q10) * self._nstomho(150, soma_area)
-            seg.klt.gkltbar = self._Tf(q10) * self._nstomho(200, soma_area)
-            seg.ih.ghbar = self._Tf(q10) * self._nstomho(20, soma_area)
-            seg.pas.g = self._Tf(q10) * self._nstomho(2, soma_area)
-            seg.pas.e = -65
-
+            seg.na_rothman93.gnabar = tf(q10) * calc_conductivity_cm2(2500e-9, 12e-12)
+            seg.kht.gkhtbar = tf(q10) * calc_conductivity_cm2(150e-9, 12e-12)
+            seg.klt.gkltbar = tf(q10) * calc_conductivity_cm2(200e-9, 12e-12)
+            seg.ih.ghbar = tf(q10) * calc_conductivity_cm2(20e-9, 12e-12)
+            seg.pas.g = tf(q10) * calc_conductivity_cm2(2e-9, 12e-12)
 
 
         # Seting up synapses
@@ -118,8 +114,6 @@ class GBC_Point(object):
 
 
 
-    def _Tf(self, q10, ref_temp=22):
-        return q10 ** ((h.celsius - ref_temp)/10.0)
 
 
     def get_spikes(self):
@@ -132,16 +126,6 @@ class GBC_Point(object):
                                  ('type', '|S3')]
         )
         return train
-
-
-
-    def _nstomho(self, ns, area):
-        """
-        Rothman/Manis helper function.
-        """
-        mho = 1e-9 * ns / area
-        # print ns, mho
-        return mho
 
 
 
@@ -305,6 +289,17 @@ class GBC_Point(object):
 
 
 
+def tf(q10, ref_temp=22):
+    v = q10 ** ((h.celsius - ref_temp)/10.0)
+    return v
+
+
+def calc_conductivity_cm2(conductance, capacity):
+    cm = 0.9e-6                 # [F/cm2]
+    area = capacity / cm        # [cm2]
+
+    conductivity = conductance / area # [S/cm2]
+    return conductivity
 
 
 
@@ -356,14 +351,13 @@ def main():
     print "ANFs after"
     print anf
 
-    biggles.plot(v)
     print
     print "GBC voltage", gbc.soma(0.5).v
     print
     print "Output spike trains"
     print gbc.get_spikes()
     print
-    print "Rate:", th.stats.rate(gbc.get_spikes())
+    print "Rate:", th.calc_rate(gbc.get_spikes())
     print
 
 
@@ -373,8 +367,14 @@ def main():
 
     print np.concatenate([a, b]).dtype
 
+    print "g_kht", calc_conductivity_cm2(150e-9, 12e-12)
+
+    plt.plot(v)
+    plt.show()
+
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
     import marlib.thorns as th
 
     main()
