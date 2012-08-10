@@ -14,6 +14,13 @@ from brian.library import synapses
 from scipy.sparse import lil_matrix
 
 
+
+def calc_tf(q10, ref_temp=22):
+    tf = q10 ** ((self._celsius - ref_temp)/10.0)
+    return tf
+
+
+
 class GBCs_RothmanManis2003(object):
     def __init__(
             self,
@@ -124,17 +131,15 @@ class GBCs_RothmanManis2003(object):
         q10 = 3.**((self._celsius - 22)/10.)
         T10 = 10.**((self._celsius - 22)/10.)
 
-        def Tf(q10, ref_temp=22):
-            return q10 ** ((self._celsius - ref_temp)/10.0)
 
 
         q10_gbar = 1.5
 
-        gnabar = Tf(q10_gbar) * 2500 * nS
-        gkhtbar = Tf(q10_gbar) * 150 * nS
-        gkltbar = Tf(q10_gbar) * 200 * nS
-        ghbar = Tf(q10_gbar) * 20 * nS
-        gl = Tf(q10_gbar) * 2 * nS
+        gnabar = calc_tf(q10_gbar) * 2500 * nS
+        gkhtbar = calc_tf(q10_gbar) * 150 * nS
+        gkltbar = calc_tf(q10_gbar) * 200 * nS
+        ghbar = calc_tf(q10_gbar) * 20 * nS
+        gl = calc_tf(q10_gbar) * 2 * nS
 
 
         # Rothman 1993 Na channel

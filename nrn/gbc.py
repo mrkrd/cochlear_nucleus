@@ -92,11 +92,11 @@ class GBC_Point(object):
 
         q10 = 1.5
         for seg in self.soma:
-            seg.na_rothman93.gnabar = tf(q10) * calc_conductivity_cm2(2500e-9, 12e-12)
-            seg.kht.gkhtbar = tf(q10) * calc_conductivity_cm2(150e-9, 12e-12)
-            seg.klt.gkltbar = tf(q10) * calc_conductivity_cm2(200e-9, 12e-12)
-            seg.ih.ghbar = tf(q10) * calc_conductivity_cm2(20e-9, 12e-12)
-            seg.pas.g = tf(q10) * calc_conductivity_cm2(2e-9, 12e-12)
+            seg.na_rothman93.gnabar = calc_tf(q10) * calc_conductivity_cm2(2500e-9, 12e-12)
+            seg.kht.gkhtbar = calc_tf(q10) * calc_conductivity_cm2(150e-9, 12e-12)
+            seg.klt.gkltbar = calc_tf(q10) * calc_conductivity_cm2(200e-9, 12e-12)
+            seg.ih.ghbar = calc_tf(q10) * calc_conductivity_cm2(20e-9, 12e-12)
+            seg.pas.g = calc_tf(q10) * calc_conductivity_cm2(2e-9, 12e-12)
 
 
         # Seting up synapses
@@ -289,9 +289,9 @@ class GBC_Point(object):
 
 
 
-def tf(q10, ref_temp=22):
-    v = q10 ** ((h.celsius - ref_temp)/10.0)
-    return v
+def calc_tf(q10, ref_temp=22):
+    tf = q10 ** ((h.celsius - ref_temp)/10.0)
+    return tf
 
 
 def calc_conductivity_cm2(conductance, capacity):
