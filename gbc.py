@@ -15,8 +15,8 @@ from scipy.sparse import lil_matrix
 
 
 
-def calc_tf(q10, ref_temp=22):
-    tf = q10 ** ((self._celsius - ref_temp)/10.0)
+def calc_tf(q10, celsius, ref_temp=22):
+    tf = q10 ** ((celsius - ref_temp)/10.0)
     return tf
 
 
@@ -119,11 +119,11 @@ class GBCs_RothmanManis2003(object):
 
 
     def _make_gbcs(self, num):
-        C=12*pF
-        Eh=-43*mV
-        EK=-77*mV # -70mV in orig py file, but -77*mV in mod file
-        El=-65*mV
-        ENa=50*mV
+        C = 12*pF
+        Eh = -43*mV
+        EK = -77*mV # -70mV in orig py file, but -77*mV in mod file
+        El = -65*mV
+        ENa = 50*mV
 
         nf = 0.85 # proportion of n vs p kinetics
         zss = 0.5 # steady state inactivation of glt
@@ -135,11 +135,12 @@ class GBCs_RothmanManis2003(object):
 
         q10_gbar = 1.5
 
-        gnabar = calc_tf(q10_gbar) * 2500 * nS
-        gkhtbar = calc_tf(q10_gbar) * 150 * nS
-        gkltbar = calc_tf(q10_gbar) * 200 * nS
-        ghbar = calc_tf(q10_gbar) * 20 * nS
-        gl = calc_tf(q10_gbar) * 2 * nS
+        gnabar = calc_tf(q10_gbar, self._celsius) * 2500 * nS
+        gkhtbar = calc_tf(q10_gbar, self._celsius) * 150 * nS
+        gkltbar = calc_tf(q10_gbar, self._celsius) * 200 * nS
+        ghbar = calc_tf(q10_gbar, self._celsius) * 20 * nS
+        gl = calc_tf(q10_gbar, self._celsius) * 2 * nS
+
 
 
         # Rothman 1993 Na channel
@@ -231,6 +232,7 @@ class GBCs_RothmanManis2003(object):
         group.p = 1. / (1 + np.exp(-(El/mV + 23) / 6.))
 
         return group
+
 
 
     def connect_anfs(self, anfs, weights, recycle=True):
@@ -330,7 +332,7 @@ class GBCs_RothmanManis2003(object):
 
         return trains
 
-
+    get_spikes = get_trains
 
 
 
@@ -355,12 +357,12 @@ def main():
     cfs = np.unique(anfs.cfs)
     gbcs = GBCs_RothmanManis2003(
         cfs=cfs,
-        convergence=(3,2,1),
+        convergences=(3,2,1),
     )
 
     gbcs.connect_anfs(
         anfs,
-        weight=(0.05, 0.05, 0.05),
+        weights=(0.05, 0.05, 0.05),
         recycle=False
     )
 
