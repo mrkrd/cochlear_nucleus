@@ -235,7 +235,7 @@ class GBCs_RothmanManis2003(object):
 
 
 
-    def connect_anfs(self, anfs, weights, recycle=True):
+    def connect_anfs(self, anfs, weights=None, recycle=True):
 
 
         anf_types = {'hsr':0, 'msr':1, 'lsr':2}
@@ -243,10 +243,11 @@ class GBCs_RothmanManis2003(object):
 
         if isinstance(weights, tuple):
             assert len(weights) == 3
-            self._weights = [weights] * len(self.group)
+            weights = [weights] * len(self.group)
+        elif weights is None:
+            weights = [None] * len(self.group)
         else:
             assert len(weights) == len(self.group)
-            self._weights = weights
 
 
 
@@ -277,7 +278,7 @@ class GBCs_RothmanManis2003(object):
                     endbulb_class=self._endbulb_classes[gbc_idx],
                     convergence=self._convergences[gbc_idx],
                     anf_type=typ,
-                    weights=self._weights[gbc_idx]
+                    weights=weights[gbc_idx]
                 )
 
 
