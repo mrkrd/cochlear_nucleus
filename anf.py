@@ -12,10 +12,7 @@ from brian import second
 class ANFs(object):
     def __init__(self, anfs):
 
-
-        p = list(anfs.dtype.names)
-        p.remove('spikes')
-        self.meta = anfs[p]
+        self.meta = anfs.drop('spikes', axis=1)
 
 
         ### cfs
@@ -49,14 +46,14 @@ class ANFs(object):
 
 
 def main():
-    import pycat
+    import cochlea
 
     fs = 100e3
     t = np.arange(0, 0.1, 1/fs)
     s = np.sin(2 * np.pi * t * 1000)
     s = pycat.set_dbspl(s, 30)
 
-    ear = pycat.Zilany2009((3,2,1), cf=(80, 8000, 10))
+    ear = cochlea.Zilany2009((3,2,1), cf=(80, 8000, 10))
     anf_raw = ear.run(s, fs)
 
     print anf_raw.dtype

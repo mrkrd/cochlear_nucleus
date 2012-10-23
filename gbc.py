@@ -6,12 +6,14 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 import random
+import pandas as pd
 
 import brian
 from brian import mV, pF, ms, nS, nA, amp, uS, uohm, second
 from brian.library import synapses
 
 from scipy.sparse import lil_matrix
+
 
 
 
@@ -27,7 +29,7 @@ class GBCs_RothmanManis2003(object):
             cfs,
             convergences,
             endbulb_class='tonic',
-            celsius = 37.,
+            celsius=37.,
             group=None):
 
 
@@ -321,15 +323,14 @@ class GBCs_RothmanManis2003(object):
 
         trains = []
         for i,spikes in spiketimes.items():
-            trains.append( (spikes, self.group.clock.t, self._cfs[i], 'gbc') )
+            trains.append({
+                'spikes': spikes,
+                'duration': self.group.clock.t,
+                'cf': self._cfs[i],
+                'type': 'gbc'
+            })
 
-        trains = np.array(
-            trains,
-            dtype=[('spikes', np.ndarray),
-                   ('duration', float),
-                   ('cf', float),
-                   ('type', '|S3')]
-        )
+        trains = pd.DataFrame(trains)
 
         return trains
 
