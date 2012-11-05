@@ -33,7 +33,7 @@ class GBCs_RothmanManis2003(object):
             group=None):
 
 
-        self._cfs = cfs
+        self._cfs = np.array(cfs)
         self._celsius = celsius
 
 
@@ -257,18 +257,22 @@ class GBCs_RothmanManis2003(object):
 
 
 
-        connection_matrix = np.zeros( (len(anfs.group), len(self.group)) )
+        connection_matrix = lil_matrix(
+            (len(anfs.group), len(self.group))
+        )
 
         active_anfs = np.ones(len(anfs.group), dtype=bool)
 
 
+        cfs = np.array(anfs.meta['cf'])
+        types = np.array(anfs.meta['type'])
         for gbc_idx in range(len(self.group)):
             for typ,i in anf_types.items():
 
                 # Indexes of all matching ANFs for a given CF and TYPE
                 anf_idxs = np.where(
-                    (anfs.meta['cf'] == self._cfs[gbc_idx]) &
-                    (anfs.meta['type'] == typ) &
+                    (cfs == self._cfs[gbc_idx]) &
+                    (types == typ) &
                     active_anfs
                 )[0]
 
@@ -288,9 +292,9 @@ class GBCs_RothmanManis2003(object):
                 )
 
 
-        ws_sparse = lil_matrix( connection_matrix ) * uS
+        connection_matrix = lil_matrix( connection_matrix ) * uS
         connection = brian.Connection(anfs.group, self.group, 'ge')
-        connection.connect( anfs.group, self.group, ws_sparse )
+        connection.connect( anfs.group, self.group, connection_matrix )
 
         self.brian_objects.append(connection)
 
@@ -356,12 +360,18 @@ def main():
     s = np.sin(2 * np.pi * t * 1000)
     s = cochlea.set_dbspl(s, 30)
 
-    ear = cochlea.Zilany2009((3,2,1), cf=(80, 8000, 2))
-    anf_raw = ear.run(s, fs, seed=0)
+    anf_trains = cochlea.run_zilany2009(
+        sound=s,
+        fs=fs,
+        anf_num=(3,2,1),
+        cf=(80, 8000, 2),
+        seed=0
+    )
 
 
-    anfs = ANFs(anf_raw)
+    anfs = ANFs(anf_trains)
     cfs = np.unique(anfs.cfs)
+
     gbcs = GBCs_RothmanManis2003(
         cfs=cfs,
         convergences=(3,2,1),
