@@ -41,7 +41,7 @@ class GBCs_RothmanManis2003(object):
             assert len(convergences) == 3
             self._convergences = [convergences] * len(self._cfs)
         else:
-            assert len(convergence) == len(self._cfs)
+            assert len(convergences) == len(self._cfs)
             self._convergences = convergences
 
 

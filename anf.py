@@ -10,9 +10,9 @@ import brian
 from brian import second
 
 class ANFs(object):
-    def __init__(self, anfs):
+    def __init__(self, anf_trains):
 
-        self.meta = anfs.drop('spikes', axis=1)
+        self.meta = anf_trains.drop('spikes', axis=1)
 
 
         ### cfs
@@ -26,7 +26,7 @@ class ANFs(object):
         ### spikes
         times = []
         indices = []
-        for i,spikes in enumerate(anfs['spikes']):
+        for i,spikes in enumerate(anf_trains['spikes']):
             times.append( spikes )
             indices.append( np.ones(len(spikes)) * i )
 
@@ -36,7 +36,7 @@ class ANFs(object):
 
 
         self.group = brian.SpikeGeneratorGroup(
-            len(anfs),
+            len(anf_trains),
             spiketimes=(indices, times)
         )
 
