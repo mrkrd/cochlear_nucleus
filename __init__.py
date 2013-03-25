@@ -2,9 +2,13 @@ from gbc import GBCs_RothmanManis2003
 from anf import ANFs
 
 import brian
-from brian import second
+from brian import (
+    second,
+    defaultclock
+)
 
-import marlib.thorns as th
+
+import marlab.thorns as th
 
 
 brian.set_global_preferences(
@@ -15,8 +19,11 @@ brian.set_global_preferences(
 def set_fs(fs):
     brian.defaultclock.dt = (1/fs) * second
 
+def reset_defaultclock():
+    brian.defaultclock.t = 0*second
 
-def run(groups, duration=None):
+
+def run(groups, duration=None, **kwargs):
 
     brian.defaultclock.t = 0 * second
 
@@ -32,8 +39,9 @@ def run(groups, duration=None):
 
     net = brian.Network(brian_objects)
 
+    kwargs.setdefault('report', 'text')
+    kwargs.setdefault('report_period', 1)
     net.run(
         duration*second,
-        report='text',
-        report_period=1
+        **kwargs
     )
