@@ -375,6 +375,6 @@ def main():
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    import marlib.thorns as th
+    import mrlib.thorns as th
 
     main()
