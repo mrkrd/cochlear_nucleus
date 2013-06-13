@@ -306,8 +306,6 @@ def calc_conductivity_cm2(conductance, capacity):
 
 
 def main():
-    import biggles
-
     h.celsius = 37
 
     gbc = GBC_Point((2,1,1), cf=1000)
