@@ -355,7 +355,7 @@ def main():
     print "Output spike trains"
     print gbc.get_spikes()
     print
-    print "Rate:", th.calc_rate(gbc.get_spikes())
+    print "Rate:", th.rate(gbc.get_spikes())
     print
 
 
