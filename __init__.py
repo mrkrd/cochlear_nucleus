@@ -8,7 +8,7 @@ from brian import (
 )
 
 
-import marlab.thorns as th
+import mrlib.thorns as th
 
 
 brian.set_global_preferences(
