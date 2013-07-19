@@ -146,6 +146,11 @@ class GBCs_RothmanManis2003(object):
         gl = calc_tf(q10_gbar, self._celsius) * 2 * nS
 
 
+        eqs = """
+        dvm/dt = (ileak + ina + ikht + iklt + ih + i_syn) / C : volt
+        vu = vm/mV : 1 # unitless v
+        """
+
 
         # Rothman 1993 Na channel
         eqs_na="""
@@ -160,6 +165,7 @@ class GBCs_RothmanManis2003(object):
         halpha = 2.4*q10 / (1. + exp((vu+68.)/3.)) /ms  +  0.8*T10 / (1. + exp(vu + 61.3)) /ms : 1/ms
         hbeta = 3.6*q10 / (1. + exp(-(vu+21.)/10.)) /ms : 1/ms
         """
+        eqs += eqs_na
 
 
         # KHT channel (delayed-rectifier K+)
@@ -172,6 +178,8 @@ class GBCs_RothmanManis2003(object):
         ntau =  ((100. / (11*exp((vu+60) / 24.) + 21*exp(-(vu+60) / 23.))) + 0.7)*ms : ms
         ptau = ((100. / (4*exp((vu+60) / 32.) + 5*exp(-(vu+60) / 22.))) + 5)*ms : ms
         """
+        eqs += eqs_kht
+
 
         # Ih channel (subthreshold adaptive, non-inactivating)
         eqs_ih="""
@@ -180,6 +188,8 @@ class GBCs_RothmanManis2003(object):
         rinf = 1. / (1+exp((vu + 76.) / 7.)) : 1
         rtau = ((100000. / (237.*exp((vu+60.) / 12.) + 17.*exp(-(vu+60.) / 14.))) + 25.)*ms : ms
         """
+        eqs += eqs_ih
+
 
         # KLT channel (low threshold K+)
         eqs_klt="""
@@ -191,25 +201,26 @@ class GBCs_RothmanManis2003(object):
         wtau = ((100. / (6.*exp((vu+60.) / 6.) + 16.*exp(-(vu+60.) / 45.))) + 1.5)*ms : ms
         ztau = ((1000. / (exp((vu+60.) / 20.) + exp(-(vu+60.) / 8.))) + 50)*ms : ms
         """
+        eqs += eqs_klt
+
 
         # Leak
-        eqs_leak="""
-        ileak = gl*(El-vm) : amp
-        """
+        eqs_leak="ileak = gl*(El-vm) : amp"
+        eqs += eqs_leak
 
-
-        eqs="""
-        dvm/dt = (ileak + ina + ikht + iklt + ih + ge_current) / C : volt
-        vu = vm/mV : 1 # unitless v
-        """
-        eqs += eqs_leak + eqs_na + eqs_ih + eqs_klt + eqs_kht
 
 
         ### Excitatory synapse
         # Q10 for synaptic decay calculated from \cite{Postlethwaite2007}
         Tf = calc_tf(q10=0.75, celsius=self._celsius, ref_temp=37)
-        syn = synapses.exp_conductance(input='ge', E=0*mV, tau=0.2*Tf*ms)
-        eqs += syn
+        # syn = synapses.exp_conductance(input='ge', E=0*mV, tau=0.2*Tf*ms)
+        e_syn = 0*mV
+        tau_syn = 0.2 * Tf * ms
+        eqs_syn = """
+        i_syn = g_syn * (e_syn - vm) : amp
+        dg_syn/dt = -g_syn/tau_syn : siemens
+        """
+        eqs += eqs_syn
 
 
 
@@ -293,7 +304,7 @@ class GBCs_RothmanManis2003(object):
 
 
         connection_matrix = lil_matrix( connection_matrix ) * uS
-        connection = brian.Connection(anfs.group, self.group, 'ge')
+        connection = brian.Connection(anfs.group, self.group, 'g_syn')
         connection.connect( anfs.group, self.group, connection_matrix )
 
         self.brian_objects.append(connection)
