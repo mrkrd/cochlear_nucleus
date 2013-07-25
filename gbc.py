@@ -277,62 +277,42 @@ class GBCs_RothmanManis2003(object):
         synapses = brian.Synapses(
             anfs.group,
             self.group,
-            model='w:1',
-            pre='vm+=w',
+            model='weight:1',
+            pre='g_syn+=weight',
         )
 
 
-        # cfs = np.array(anfs.meta['cf'])
-        # types = np.array(anfs.meta['type'])
-        # for gbc_idx in range(len(self.group)):
-        #     for typ,typ_idx in anf_types.items():
+        cfs = np.array(anfs.meta['cf'])
+        types = np.array(anfs.meta['type'])
+        for gbc_idx in range(len(self.group)):
+            for typ,typ_idx in anf_types.items():
 
-        #         # Indexes of all active ANFs for a given CF and TYPE
-        #         anf_idxs = np.where(
-        #             (cfs == self._cfs[gbc_idx]) &
-        #             (types == typ) &
-        #             active_anfs
-        #         )[0]
+                # Indexes of all active ANFs for a given CF and TYPE
+                anf_idxs = np.where(
+                    (cfs == self._cfs[gbc_idx]) &
+                    (types == typ) &
+                    active_anfs
+                )[0]
 
-        #         anf_idx = random.sample(
-        #             anf_idxs,
-        #             self._convergences[gbc_idx][typ_idx]
-        #         )
+                anf_idx = random.sample(
+                    anf_idxs,
+                    self._convergences[gbc_idx][typ_idx]
+                )
 
-        #         if not recycle:
-        #             active_anfs[anf_idx] = False
+                if not recycle:
+                    active_anfs[anf_idx] = False
 
-                # connection_matrix[anf_idx,gbc_idx] = self._calc_synaptic_weight(
-                #     endbulb_class=self._endbulb_classes[gbc_idx],
-                #     convergence=self._convergences[gbc_idx],
-                #     anf_type=typ,
-                #     weights=weights[gbc_idx]
-                # )
-
-                # for i in anf_idx:
-                #     print(i,gbc_idx)
-                #     synapses[i,gbc_idx] = True
-                #     synapses.w[i,gbc_idx] = 1
-
-                    # self._calc_synaptic_weight(
-                    #     endbulb_class=self._endbulb_classes[gbc_idx],
-                    #     convergence=self._convergences[gbc_idx],
-                    #     anf_type=typ,
-                    #     weights=weights[gbc_idx]
-                    # )
+                for i in anf_idx:
+                    synapses[i,gbc_idx] = True
+                    weight = self._calc_synaptic_weight(
+                        endbulb_class=self._endbulb_classes[gbc_idx],
+                        convergence=self._convergences[gbc_idx],
+                        anf_type=typ,
+                        weights=weights[gbc_idx]
+                    ) * uS
+                    synapses.weight[i,gbc_idx] = weight
 
 
-
-
-
-
-        # connection_matrix = lil_matrix( connection_matrix ) * uS
-        # connection = brian.Connection(anfs.group, self.group, 'g_syn')
-        # connection.connect( anfs.group, self.group, connection_matrix )
-        print(anfs.group)
-        synapses[:,1] = True
-        # synapses[0,0] = True
-        synapses.w = 1 * nS
         self.brian_objects.append(synapses)
 
 
