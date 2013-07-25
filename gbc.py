@@ -9,10 +9,79 @@ import random
 import pandas as pd
 
 import brian
-from brian import mV, pF, ms, nS, nA, amp, uS, uohm, second
-from brian.library import synapses
+from brian import mV, pF, ms, siemens, nA, amp, nS, uohm, second
 
-from scipy.sparse import lil_matrix
+
+_default_weights = {
+    ('10%-depressing', (16, 2, 2)): (0.0072790147819572215*1e-6,
+                                     0.01300363406907902*1e-6,
+                                     0.025077761219112135*1e-6),
+    ('10%-depressing', (24, 3, 3)): (0.0060803036590587464*1e-6,
+                                     0.011064608209339638*1e-6,
+                                     0.022960611280205795*1e-6),
+    ('10%-depressing', (32, 4, 4)): (0.0052627911610534182*1e-6,
+                                     0.009997284283591602*1e-6,
+                                     0.019772102754783479*1e-6),
+    ('10%-depressing', (40, 5, 5)): (0.0047530380948505235*1e-6,
+                                     0.0093045639569898642*1e-6,
+                                     0.018217731766975283*1e-6),
+    ('tonic', (0, 0, 20)): (0.0, 0.0, 0.070062207003387347*1e-6),
+    ('tonic', (0, 0, 40)): (0.0, 0.0, 0.084179665808960011*1e-6),
+    ('tonic', (16, 2, 2)): (0.007038794817791418*1e-6,
+                            0.01266342935321116*1e-6,
+                            0.02541172424059597*1e-6),
+    ('tonic', (20, 0, 0)): (0.0066033045079881593*1e-6, 0.0, 0.0),
+    ('tonic', (24, 3, 3)): (0.0058733536098521466*1e-6,
+                            0.010682710448933506*1e-6,
+                            0.021856493947204871*1e-6),
+    ('tonic', (32, 4, 4)): (0.0051942288176696858*1e-6,
+                            0.009887290059422231*1e-6,
+                            0.019580587912241685*1e-6),
+    ('tonic', (40, 0, 0)): (0.0047561806622803005*1e-6, 0.0, 0.0),
+    ('tonic', (40, 5, 5)): (0.0046037072220965133*1e-6,
+                            0.0093309748057562245*1e-6,
+                            0.017105117399478547*1e-6),
+    ('yang2009impact', (16, 2, 2)): (0.014024066512624741*1e-6,
+                                     0.035801613002810206*1e-6,
+                                     0.21464383648564361*1e-6),
+    ('yang2009impact', (24, 3, 3)): (0.014151826854560337*1e-6,
+                                     0.013762257387782693*1e-6,
+                                     0.10069232021044561*1e-6),
+    ('yang2009impact', (32, 4, 4)): (0.012441810052544041*1e-6,
+                                     0.013691620281564799*1e-6,
+                                     0.086407868314042346*1e-6),
+    ('yang2009impact', (40, 5, 5)): (0.011215341103431862*1e-6,
+                                     0.011607518306086639*1e-6,
+                                     0.089115665231745828*1e-6),
+    ('electric', (20, 0, 0)): (0.00249200829105*1e-6, 0.0, 0.0)
+}
+
+
+
+def _calc_synaptic_weight(endbulb_class, convergence, anf_type, weights, celsius):
+
+    assert endbulb_class == 'tonic', "Only tonic synapse is implemented."
+
+    anf_type_idx = {'hsr': 0, 'msr': 1, 'lsr': 2}[anf_type]
+
+    ### Use precalculated weights
+    if weights is None:
+        assert celsius == 37 # default weights were calculated at 37C
+        ws = _default_weights[ (endbulb_class, convergence) ]
+        w = ws[ anf_type_idx ]
+
+    elif isinstance(weights, float) or isinstance(weights, int):
+        w = weights
+
+    elif isinstance(weights, tuple):
+        assert len(weights) == 3
+        w = weights[anf_type_idx]
+
+    else:
+        raise RuntimeError, "Unknown weight format."
+
+    return w * siemens
+
 
 
 
@@ -30,7 +99,8 @@ class GBCs_RothmanManis2003(object):
             convergences,
             endbulb_class='tonic',
             celsius=37.,
-            group=None):
+            group=None
+    ):
 
 
         self._cfs = np.array(cfs)
@@ -71,54 +141,6 @@ class GBCs_RothmanManis2003(object):
         self.brian_objects = [self.group, self._spike_monitor]
 
 
-    _default_weights = (
-
-        {
-            ('10%-depressing', (16, 2, 2)): (0.0072790147819572215,
-                                             0.01300363406907902,
-                                             0.025077761219112135),
-            ('10%-depressing', (24, 3, 3)): (0.0060803036590587464,
-                                             0.011064608209339638,
-                                             0.022960611280205795),
-            ('10%-depressing', (32, 4, 4)): (0.0052627911610534182,
-                                             0.009997284283591602,
-                                             0.019772102754783479),
-            ('10%-depressing', (40, 5, 5)): (0.0047530380948505235,
-                                             0.0093045639569898642,
-                                             0.018217731766975283),
-            ('tonic', (0, 0, 20)): (0.0, 0.0, 0.070062207003387347),
-            ('tonic', (0, 0, 40)): (0.0, 0.0, 0.084179665808960011),
-            ('tonic', (16, 2, 2)): (0.007038794817791418,
-                                    0.01266342935321116,
-                                    0.02541172424059597),
-            ('tonic', (20, 0, 0)): (0.0066033045079881593, 0.0, 0.0),
-            ('tonic', (24, 3, 3)): (0.0058733536098521466,
-                                    0.010682710448933506,
-                                    0.021856493947204871),
-            ('tonic', (32, 4, 4)): (0.0051942288176696858,
-                                    0.009887290059422231,
-                                    0.019580587912241685),
-            ('tonic', (40, 0, 0)): (0.0047561806622803005, 0.0, 0.0),
-            ('tonic', (40, 5, 5)): (0.0046037072220965133,
-                                    0.0093309748057562245,
-                                    0.017105117399478547),
-            ('yang2009impact', (16, 2, 2)): (0.014024066512624741,
-                                             0.035801613002810206,
-                                             0.21464383648564361),
-            ('yang2009impact', (24, 3, 3)): (0.014151826854560337,
-                                             0.013762257387782693,
-                                             0.10069232021044561),
-            ('yang2009impact', (32, 4, 4)): (0.012441810052544041,
-                                             0.013691620281564799,
-                                             0.086407868314042346),
-            ('yang2009impact', (40, 5, 5)): (0.011215341103431862,
-                                             0.011607518306086639,
-                                             0.089115665231745828),
-            ('electric', (20, 0, 0)): (0.00249200829105, 0.0, 0.0)
-
-     }
-
-    )
 
 
 
@@ -213,7 +235,6 @@ class GBCs_RothmanManis2003(object):
         ### Excitatory synapse
         # Q10 for synaptic decay calculated from \cite{Postlethwaite2007}
         Tf = calc_tf(q10=0.75, celsius=self._celsius, ref_temp=37)
-        # syn = synapses.exp_conductance(input='ge', E=0*mV, tau=0.2*Tf*ms)
         e_syn = 0*mV
         tau_syn = 0.2 * Tf * ms
         eqs_syn = """
@@ -254,6 +275,7 @@ class GBCs_RothmanManis2003(object):
 
     def connect_anfs(self, anfs, weights=None, recycle=True):
 
+        random.seed(0)
 
         anf_types = {'hsr':0, 'msr':1, 'lsr':2}
 
@@ -265,10 +287,6 @@ class GBCs_RothmanManis2003(object):
             weights = [None] * len(self.group)
         else:
             assert len(weights) == len(self.group)
-
-
-
-        print(len(anfs.group), len(self.group))
 
 
         active_anfs = np.ones(len(anfs.group), dtype=bool)
@@ -304,43 +322,19 @@ class GBCs_RothmanManis2003(object):
 
                 for i in anf_idx:
                     synapses[i,gbc_idx] = True
-                    weight = self._calc_synaptic_weight(
+                    weight = _calc_synaptic_weight(
                         endbulb_class=self._endbulb_classes[gbc_idx],
                         convergence=self._convergences[gbc_idx],
                         anf_type=typ,
-                        weights=weights[gbc_idx]
-                    ) * uS
+                        weights=weights[gbc_idx],
+                        celsius=self._celsius
+                    )
                     synapses.weight[i,gbc_idx] = weight
-
 
         self.brian_objects.append(synapses)
 
 
 
-
-    def _calc_synaptic_weight(self, endbulb_class, convergence, anf_type, weights):
-
-        assert endbulb_class == 'tonic', "Only tonic synapse is implemented."
-
-        anf_type_idx = {'hsr': 0, 'msr': 1, 'lsr': 2}[anf_type]
-
-        ### Use precalculated weights
-        if weights is None:
-            assert self._celsius == 37 # default weights were calculated at 37C
-            ws = self._default_weights[ (endbulb_class, convergence) ]
-            w = ws[ anf_type_idx ]
-
-        elif isinstance(weights, float) or isinstance(weights, int):
-            w = weights
-
-        elif isinstance(weights, tuple):
-            assert len(weights) == 3
-            w = weights[anf_type_idx]
-
-        else:
-            raise RuntimeError, "Unknown weight format."
-
-        return w
 
 
 
@@ -396,7 +390,7 @@ def main():
 
     gbcs.connect_anfs(
         anfs,
-        weights=(0.05, 0.05, 0.05),
+        weights=(0.05*1e-6, 0.05*1e-6, 0.05*1e-6),
         recycle=False
     )
 
