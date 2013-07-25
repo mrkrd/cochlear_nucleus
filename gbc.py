@@ -268,46 +268,72 @@ class GBCs_RothmanManis2003(object):
 
 
 
-        connection_matrix = lil_matrix(
-            (len(anfs.group), len(self.group))
-        )
+        print(len(anfs.group), len(self.group))
+
 
         active_anfs = np.ones(len(anfs.group), dtype=bool)
 
 
-        cfs = np.array(anfs.meta['cf'])
-        types = np.array(anfs.meta['type'])
-        for gbc_idx in range(len(self.group)):
-            for typ,i in anf_types.items():
-
-                # Indexes of all matching ANFs for a given CF and TYPE
-                anf_idxs = np.where(
-                    (cfs == self._cfs[gbc_idx]) &
-                    (types == typ) &
-                    active_anfs
-                )[0]
-
-                anf_idx = random.sample(
-                    anf_idxs,
-                    self._convergences[gbc_idx][i]
-                )
-
-                if not recycle:
-                    active_anfs[anf_idx] = False
-
-                connection_matrix[anf_idx,gbc_idx] = self._calc_synaptic_weight(
-                    endbulb_class=self._endbulb_classes[gbc_idx],
-                    convergence=self._convergences[gbc_idx],
-                    anf_type=typ,
-                    weights=weights[gbc_idx]
-                )
+        synapses = brian.Synapses(
+            anfs.group,
+            self.group,
+            model='w:1',
+            pre='vm+=w',
+        )
 
 
-        connection_matrix = lil_matrix( connection_matrix ) * uS
-        connection = brian.Connection(anfs.group, self.group, 'g_syn')
-        connection.connect( anfs.group, self.group, connection_matrix )
+        # cfs = np.array(anfs.meta['cf'])
+        # types = np.array(anfs.meta['type'])
+        # for gbc_idx in range(len(self.group)):
+        #     for typ,typ_idx in anf_types.items():
 
-        self.brian_objects.append(connection)
+        #         # Indexes of all active ANFs for a given CF and TYPE
+        #         anf_idxs = np.where(
+        #             (cfs == self._cfs[gbc_idx]) &
+        #             (types == typ) &
+        #             active_anfs
+        #         )[0]
+
+        #         anf_idx = random.sample(
+        #             anf_idxs,
+        #             self._convergences[gbc_idx][typ_idx]
+        #         )
+
+        #         if not recycle:
+        #             active_anfs[anf_idx] = False
+
+                # connection_matrix[anf_idx,gbc_idx] = self._calc_synaptic_weight(
+                #     endbulb_class=self._endbulb_classes[gbc_idx],
+                #     convergence=self._convergences[gbc_idx],
+                #     anf_type=typ,
+                #     weights=weights[gbc_idx]
+                # )
+
+                # for i in anf_idx:
+                #     print(i,gbc_idx)
+                #     synapses[i,gbc_idx] = True
+                #     synapses.w[i,gbc_idx] = 1
+
+                    # self._calc_synaptic_weight(
+                    #     endbulb_class=self._endbulb_classes[gbc_idx],
+                    #     convergence=self._convergences[gbc_idx],
+                    #     anf_type=typ,
+                    #     weights=weights[gbc_idx]
+                    # )
+
+
+
+
+
+
+        # connection_matrix = lil_matrix( connection_matrix ) * uS
+        # connection = brian.Connection(anfs.group, self.group, 'g_syn')
+        # connection.connect( anfs.group, self.group, connection_matrix )
+        print(anfs.group)
+        synapses[:,1] = True
+        # synapses[0,0] = True
+        synapses.w = 1 * nS
+        self.brian_objects.append(synapses)
 
 
 
@@ -378,7 +404,7 @@ def main():
         cf=(80, 8000, 2),
         seed=0
     )
-
+    print(anf_trains)
 
     anfs = ANFs(anf_trains)
     cfs = np.unique(anfs.cfs)

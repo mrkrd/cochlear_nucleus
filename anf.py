@@ -34,7 +34,6 @@ class ANFs(object):
         indices = np.concatenate( indices )
         times = np.concatenate( times ) * second
 
-
         self.group = brian.SpikeGeneratorGroup(
             len(anf_trains),
             spiketimes=(indices, times)
