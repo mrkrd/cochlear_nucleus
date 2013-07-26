@@ -60,8 +60,6 @@ _default_weights = {
 
 def _calc_synaptic_weight(endbulb_class, convergence, anf_type, weights, celsius):
 
-    assert endbulb_class == 'tonic', "Only tonic synapse is implemented."
-
     anf_type_idx = {'hsr': 0, 'msr': 1, 'lsr': 2}[anf_type]
 
     ### Use precalculated weights
@@ -78,7 +76,7 @@ def _calc_synaptic_weight(endbulb_class, convergence, anf_type, weights, celsius
         w = weights[anf_type_idx]
 
     else:
-        raise RuntimeError, "Unknown weight format."
+        raise RuntimeError("Unknown weight format.")
 
     return w * siemens
 
@@ -116,14 +114,7 @@ class GBCs_RothmanManis2003(object):
 
 
 
-        if isinstance(endbulb_class, str):
-            self._endbulb_classes = [endbulb_class] * len(self._cfs)
-        else:
-            assert len(endbulb_class) == len(self._cfs)
-            self._endbulb_classes = endbulb_class
-
-
-
+        self._endbulb_class = endbulb_class
 
 
         if group is None:
@@ -292,11 +283,31 @@ class GBCs_RothmanManis2003(object):
         active_anfs = np.ones(len(anfs.group), dtype=bool)
 
 
+        if self._endbulb_class == 'tonic':
+            pre_synapse = 'g_syn+=weight'
+            model_synapse = 'weight:1'
+        elif self._endbulb_class == 'yang2009impact':
+            model_synapse = 'weight:1'
+            U = 0.47
+            tau_fast = 26e-3
+            tau_slow = 1
+            k = 0.6
+
+            pre_synapse = '''
+            g_fast = g_syn*(1-U)*np.exp(-(t-lastupdate)/tau_fast) + (1-np.exp(-(t-lastupdate)/tau_fast))
+            g_slow = g_syn*(1-U)*np.exp(-(t-lastupdate)/tau_slow) + (1-np.exp(-(t-lastupdate)/tau_slow))
+            g_syn = k*g_fast + (1-k)*g_slow
+            print(g_syn)
+            '''
+        else:
+            raise NotImplemented("Synapse {} not implemented".format(self._endbulb_class))
+
+
         synapses = brian.Synapses(
             anfs.group,
             self.group,
-            model='weight:1',
-            pre='g_syn+=weight',
+            model=model_synapse,
+            pre=pre_synapse
         )
 
 
@@ -323,7 +334,7 @@ class GBCs_RothmanManis2003(object):
                 for i in anf_idx:
                     synapses[i,gbc_idx] = True
                     weight = _calc_synaptic_weight(
-                        endbulb_class=self._endbulb_classes[gbc_idx],
+                        endbulb_class=self._endbulb_class,
                         convergence=self._convergences[gbc_idx],
                         anf_type=typ,
                         weights=weights[gbc_idx],
@@ -386,6 +397,7 @@ def main():
     gbcs = GBCs_RothmanManis2003(
         cfs=cfs,
         convergences=(3,2,1),
+        endbulb_class='yang2009impact'
     )
 
     gbcs.connect_anfs(
