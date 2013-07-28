@@ -287,17 +287,20 @@ class GBCs_RothmanManis2003(object):
             pre_synapse = 'g_syn+=weight'
             model_synapse = 'weight:1'
         elif self._endbulb_class == 'yang2009impact':
-            model_synapse = 'weight:1'
+            model_synapse = '''
+            weight: 1
+            g_syn: 1
+            '''
             U = 0.47
             tau_fast = 26e-3
             tau_slow = 1
             k = 0.6
+            exp = np.exp
 
             pre_synapse = '''
-            g_fast = g_syn*(1-U)*np.exp(-(t-lastupdate)/tau_fast) + (1-np.exp(-(t-lastupdate)/tau_fast))
-            g_slow = g_syn*(1-U)*np.exp(-(t-lastupdate)/tau_slow) + (1-np.exp(-(t-lastupdate)/tau_slow))
+            g_fast = g_syn*(1-U)*exp(-(t-lastupdate)/tau_fast) + weight*(1-exp(-(t-lastupdate)/tau_fast))
+            g_slow = g_syn*(1-U)*exp(-(t-lastupdate)/tau_slow) + weight*(1-exp(-(t-lastupdate)/tau_slow))
             g_syn = k*g_fast + (1-k)*g_slow
-            print(g_syn)
             '''
         else:
             raise NotImplemented("Synapse {} not implemented".format(self._endbulb_class))
@@ -341,6 +344,7 @@ class GBCs_RothmanManis2003(object):
                         celsius=self._celsius
                     )
                     synapses.weight[i,gbc_idx] = weight
+                    synapses.g_syn[gbc_idx] = weight / (1-U)
 
         self.brian_objects.append(synapses)
 
