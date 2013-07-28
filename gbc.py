@@ -229,8 +229,8 @@ class GBCs_RothmanManis2003(object):
         e_syn = 0*mV
         tau_syn = 0.2 * Tf * ms
         eqs_syn = """
-        i_syn = g_syn * (e_syn - vm) : amp
-        dg_syn/dt = -g_syn/tau_syn : siemens
+        i_syn = g_syn_tot * (e_syn - vm) : amp
+        dg_syn_tot/dt = -g_syn_tot/tau_syn : siemens
         """
         eqs += eqs_syn
 
@@ -284,24 +284,31 @@ class GBCs_RothmanManis2003(object):
 
 
         if self._endbulb_class == 'tonic':
-            pre_synapse = 'g_syn+=weight'
-            model_synapse = 'weight:1'
+            U = 0
+            model_synapse = """
+            weight :siemens
+            g_syn :siemens
+            """
+            pre_synapse = "g_syn_tot += weight"
+
         elif self._endbulb_class == 'yang2009impact':
-            model_synapse = '''
-            weight: 1
-            g_syn: 1
-            '''
             U = 0.47
             tau_fast = 26e-3
             tau_slow = 1
             k = 0.6
             exp = np.exp
 
-            pre_synapse = '''
+            model_synapse = """
+            weight :siemens
+            g_syn :siemens
+            """
+            pre_synapse = """
             g_fast = g_syn*(1-U)*exp(-(t-lastupdate)/tau_fast) + weight*(1-exp(-(t-lastupdate)/tau_fast))
             g_slow = g_syn*(1-U)*exp(-(t-lastupdate)/tau_slow) + weight*(1-exp(-(t-lastupdate)/tau_slow))
             g_syn = k*g_fast + (1-k)*g_slow
-            '''
+            g_syn_tot += g_syn
+            """
+
         else:
             raise NotImplemented("Synapse {} not implemented".format(self._endbulb_class))
 
@@ -312,6 +319,7 @@ class GBCs_RothmanManis2003(object):
             model=model_synapse,
             pre=pre_synapse
         )
+
 
 
         cfs = np.array(anfs.meta['cf'])
@@ -344,7 +352,8 @@ class GBCs_RothmanManis2003(object):
                         celsius=self._celsius
                     )
                     synapses.weight[i,gbc_idx] = weight
-                    synapses.g_syn[gbc_idx] = weight / (1-U)
+                    synapses.g_syn[i,gbc_idx] = weight / (1-U)
+
 
         self.brian_objects.append(synapses)
 
@@ -401,7 +410,7 @@ def main():
     gbcs = GBCs_RothmanManis2003(
         cfs=cfs,
         convergences=(3,2,1),
-        endbulb_class='yang2009impact'
+        endbulb_class='tonic'
     )
 
     gbcs.connect_anfs(
