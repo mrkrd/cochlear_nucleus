@@ -331,6 +331,7 @@ class GBCs_RothmanManis2003(object):
         pre = []
         post = []
         ws = []
+        ## TODO: ugly loop
         for gbc_idx in range(len(self.group)):
             for typ,typ_idx in anf_types.items():
 
