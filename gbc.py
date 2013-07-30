@@ -263,15 +263,12 @@ class GBCs_RothmanManis2003(object):
         return group
 
 
-    # @profile
+
     def connect_anfs(self, anfs, weights=None, recycle=True):
 
         random.seed(0)
 
         anf_types = {'hsr':0, 'msr':1, 'lsr':2}
-
-        presynaptic = []
-        postsynaptic = []
 
 
         if isinstance(weights, tuple):
@@ -324,48 +321,64 @@ class GBCs_RothmanManis2003(object):
         )
 
 
-
         cfs = np.array(anfs.meta['cf'])
-        types = np.array(anfs.meta['type'])
+        type_mask = {
+            'hsr': (np.array(anfs.meta['type']) == 'hsr'),
+            'msr': (np.array(anfs.meta['type']) == 'msr'),
+            'lsr': (np.array(anfs.meta['type']) == 'lsr'),
+        }
+
+        pre = []
+        post = []
+        ws = []
         for gbc_idx in range(len(self.group)):
             for typ,typ_idx in anf_types.items():
 
-                # Indexes of all active ANFs for a given CF and TYPE
+                ## Indexes of all active ANFs for a given CF and TYPE
                 anf_idxs = np.where(
                     (cfs == self._cfs[gbc_idx]) &
-                    (types == typ) &
+                    (type_mask[typ]) &
                     active_anfs
                 )[0]
 
-                anf_idx = random.sample(
+                ## Pick ANF indexes to connect to a given GBC
+                anf_sel = random.sample(
                     anf_idxs,
                     self._convergences[gbc_idx][typ_idx]
                 )
+                anf_sel = np.array(anf_sel, dtype=int)
+
 
                 if not recycle:
-                    active_anfs[anf_idx] = False
+                    active_anfs[anf_sel] = False
 
 
-                presynaptic.append(anf_idx)
-                postsynaptic.append(np.repeat(gbc_idx, len(anf_idx)))
+                weight = _calc_synaptic_weight(
+                    endbulb_class=self._endbulb_class,
+                    convergence=self._convergences[gbc_idx],
+                    anf_type=typ,
+                    weights=weights[gbc_idx],
+                    celsius=self._celsius
+                )
 
-                # for i in anf_idx:
-                #     # synapses[i,gbc_idx] = True
-                #     weight = _calc_synaptic_weight(
-                #         endbulb_class=self._endbulb_class,
-                #         convergence=self._convergences[gbc_idx],
-                #         anf_type=typ,
-                #         weights=weights[gbc_idx],
-                #         celsius=self._celsius
-                #     )
-                #     synapses.weight[i,gbc_idx] = weight
-                #     synapses.g_syn[i,gbc_idx] = weight / (1-U)
+                pre.append(anf_sel)
+                post.append(np.repeat(
+                    gbc_idx,
+                    len(anf_sel)
+                ))
+                ws.append(np.repeat(
+                    weight,
+                    len(anf_sel)
+                ))
 
-        presynaptic = np.concatenate( presynaptic )
-        postsynaptic = np.concatenate( postsynaptic )
-        synapses.create_synapses(presynaptic, postsynaptic)
 
-        asdf
+        pre = np.concatenate( pre )
+        post = np.concatenate( post )
+        synapses.create_synapses(pre, post)
+
+        ws = np.concatenate( ws )
+        synapses.weight = ws
+        synapses.g_syn = ws / (1-U)
 
         self.brian_objects.append(synapses)
 

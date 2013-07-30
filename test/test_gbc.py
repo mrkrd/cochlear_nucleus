@@ -16,6 +16,7 @@ import numpy.testing as npt
 
 import cochlear_nucleus as cn
 
+
 def test_synaptic_connections():
 
     anf_trains = pd.DataFrame([
