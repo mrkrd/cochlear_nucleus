@@ -263,12 +263,15 @@ class GBCs_RothmanManis2003(object):
         return group
 
 
-
+    # @profile
     def connect_anfs(self, anfs, weights=None, recycle=True):
 
         random.seed(0)
 
         anf_types = {'hsr':0, 'msr':1, 'lsr':2}
+
+        presynaptic = []
+        postsynaptic = []
 
 
         if isinstance(weights, tuple):
@@ -342,18 +345,27 @@ class GBCs_RothmanManis2003(object):
                 if not recycle:
                     active_anfs[anf_idx] = False
 
-                for i in anf_idx:
-                    synapses[i,gbc_idx] = True
-                    weight = _calc_synaptic_weight(
-                        endbulb_class=self._endbulb_class,
-                        convergence=self._convergences[gbc_idx],
-                        anf_type=typ,
-                        weights=weights[gbc_idx],
-                        celsius=self._celsius
-                    )
-                    synapses.weight[i,gbc_idx] = weight
-                    synapses.g_syn[i,gbc_idx] = weight / (1-U)
 
+                presynaptic.append(anf_idx)
+                postsynaptic.append(np.repeat(gbc_idx, len(anf_idx)))
+
+                # for i in anf_idx:
+                #     # synapses[i,gbc_idx] = True
+                #     weight = _calc_synaptic_weight(
+                #         endbulb_class=self._endbulb_class,
+                #         convergence=self._convergences[gbc_idx],
+                #         anf_type=typ,
+                #         weights=weights[gbc_idx],
+                #         celsius=self._celsius
+                #     )
+                #     synapses.weight[i,gbc_idx] = weight
+                #     synapses.g_syn[i,gbc_idx] = weight / (1-U)
+
+        presynaptic = np.concatenate( presynaptic )
+        postsynaptic = np.concatenate( postsynaptic )
+        synapses.create_synapses(presynaptic, postsynaptic)
+
+        asdf
 
         self.brian_objects.append(synapses)
 
@@ -371,7 +383,9 @@ class GBCs_RothmanManis2003(object):
                 'spikes': spikes,
                 'duration': self.group.clock.t,
                 'cf': self._cfs[i],
-                'type': 'gbc'
+                'type': 'gbc',
+                'endbulb_class': self._endbulb_class,
+                'convergence': self._convergences[i]
             })
 
         trains = pd.DataFrame(trains)
@@ -405,7 +419,7 @@ def main():
     print(anf_trains)
 
     anfs = ANFs(anf_trains)
-    cfs = np.unique(anfs.cfs)
+    cfs = anfs.cfs.unique()
 
     gbcs = GBCs_RothmanManis2003(
         cfs=cfs,
@@ -432,6 +446,7 @@ def main():
         M
     )
 
+    ### could use cn.run() instead
     net.run(
         tmax*second,
         report='text',
