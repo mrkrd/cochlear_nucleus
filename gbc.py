@@ -310,7 +310,7 @@ class GBCs_RothmanManis2003(object):
             """
 
         else:
-            raise NotImplemented("Synapse {} not implemented".format(self._endbulb_class))
+            raise NotImplementedError("Synapse {} not implemented".format(self._endbulb_class))
 
 
         synapses = brian.Synapses(
