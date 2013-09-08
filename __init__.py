@@ -1,4 +1,8 @@
-from gbc import GBCs_RothmanManis2003
+from gbc import (
+    GBCs_RothmanManis2003,
+    make_gbc_group
+)
+
 from anf import ANFs
 
 import brian
