@@ -128,7 +128,7 @@ def make_gbc_group(num):
         N=num,
         model=eqs,
         threshold=brian.EmpiricalThreshold(threshold=-20*mV, refractory=refractory),
-        implicit=True
+        implicit=True,
     )
 
 
