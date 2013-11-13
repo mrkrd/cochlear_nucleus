@@ -13,9 +13,7 @@ from brian import mV, pF, ms, siemens, nA, amp, nS, uohm, second
 
 
 
-def make_gbc_group(num):
-
-    celsius = 37
+def make_gbc_group(num, celsius=37):
 
     C = 12*pF
     Eh = -43*mV

@@ -1,6 +1,7 @@
 from gbc import (
     GBCs_RothmanManis2003,
-    make_gbc_group
+    make_gbc_group,
+    make_gbcs
 )
 
 from anf import ANFs
