@@ -572,7 +572,7 @@ def main():
     cfs = anfs.cfs.unique()
 
     gbcs = GBCs_RothmanManis2003(
-        cfs=cfs,
+        cfs=cfs, #[500, 500, 1000, 1000]
         convergences=(3,2,1),
         endbulb_class='tonic'
     )
