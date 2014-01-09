@@ -1,7 +1,8 @@
 from gbc import (
     GBCs_RothmanManis2003,
     make_gbc_group,
-    make_gbcs
+    make_gbcs,
+    get_weight,
 )
 
 from anf import (
@@ -28,8 +29,10 @@ brian.set_global_preferences(
 def set_fs(fs):
     brian.defaultclock.dt = (1/fs) * second
 
-def reset():
+def reset_defaultclock():
     brian.defaultclock.t = 0*second
+
+reset = reset_defaultclock
 
 def run(groups, duration=None, **kwargs):
 

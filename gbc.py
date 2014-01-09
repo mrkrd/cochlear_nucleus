@@ -148,6 +148,24 @@ make_gbcs = make_gbc_group
 
 
 
+def get_weight(
+        pre,
+        post,
+        convergence,
+        synapse='tonic'
+):
+
+    if (pre,post,synapse,convergence) == ('hsr','gbc','tonic',(40,0,0)):
+        weight = 5e-9 * siemens
+
+    else:
+        raise RuntimeError("Unknown synaptic parameters")
+
+    return weight
+
+
+
+
 _default_weights = {
     ('10%-depressing', (16, 2, 2)): (0.0072790147819572215*1e-6,
                                      0.01300363406907902*1e-6,
