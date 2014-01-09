@@ -4,7 +4,11 @@ from gbc import (
     make_gbcs
 )
 
-from anf import ANFs
+from anf import (
+    ANFs,
+    make_anf_group,
+    make_anfs
+)
 
 import brian
 from brian import (
@@ -24,9 +28,8 @@ brian.set_global_preferences(
 def set_fs(fs):
     brian.defaultclock.dt = (1/fs) * second
 
-def reset_defaultclock():
+def reset():
     brian.defaultclock.t = 0*second
-
 
 def run(groups, duration=None, **kwargs):
 

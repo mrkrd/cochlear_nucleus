@@ -9,6 +9,30 @@ import numpy as np
 import brian
 from brian import second
 
+def make_anf_group(anf_trains):
+
+    times = []
+    indices = []
+    for i,spikes in enumerate(anf_trains['spikes']):
+        times.append( spikes )
+        indices.append( np.ones(len(spikes)) * i )
+
+
+    indices = np.concatenate( indices )
+    times = np.concatenate( times ) * second
+
+    group = brian.SpikeGeneratorGroup(
+        len(anf_trains),
+        spiketimes=(indices, times)
+    )
+
+    return group
+
+
+make_anfs = make_anf_group
+
+
+
 class ANFs(object):
     def __init__(self, anf_trains):
 
