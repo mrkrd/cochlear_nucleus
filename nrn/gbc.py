@@ -48,16 +48,16 @@ class GBC_Point(object):
          ('tonic', (40, 5, 5)): (0.0046037072220965133,
                                  0.0093309748057562245,
                                  0.017105117399478547),
-         ('yang2009impact', (16, 2, 2)): (0.014024066512624741,
+         ('yang2009', (16, 2, 2)): (0.014024066512624741,
                                           0.035801613002810206,
                                           0.21464383648564361),
-         ('yang2009impact', (24, 3, 3)): (0.014151826854560337,
+         ('yang2009', (24, 3, 3)): (0.014151826854560337,
                                           0.013762257387782693,
                                           0.10069232021044561),
-         ('yang2009impact', (32, 4, 4)): (0.012441810052544041,
+         ('yang2009', (32, 4, 4)): (0.012441810052544041,
                                           0.013691620281564799,
                                           0.086407868314042346),
-         ('yang2009impact', (40, 5, 5)): (0.011215341103431862,
+         ('yang2009', (40, 5, 5)): (0.011215341103431862,
                                           0.011607518306086639,
                                           0.089115665231745828)}
 
@@ -171,8 +171,8 @@ class GBC_Point(object):
             EndbulbClass = h.ExpSyn
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0, 'tau': 0.2}
-        elif endbulb_class in ("recov2exp", "yang2009impact"):
-            endbulb_class = "yang2009impact"
+        elif endbulb_class in ("recov2exp", "yang2009"):
+            endbulb_class = "yang2009"
             EndbulbClass = h.Recov2Exp
             if endbulb_pars is None:
                 endbulb_pars = {'e': 0,
