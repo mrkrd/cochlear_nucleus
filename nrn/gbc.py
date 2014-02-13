@@ -4,10 +4,17 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
+import pandas as pd
 
 import neuron
 from neuron import h
 
+
+import logging
+
+logging.basicConfig()
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 
 class GBC_Point(object):
@@ -59,17 +66,17 @@ class GBC_Point(object):
 
 
 
-    def __init__(self,
-                 convergence=(0,0,0),
-                 cf=1000,
-                 endbulb_class="tonic",
-                 endbulb_pars=None,
-                 threshold=-20,
-                 debug=True):
+    def __init__(
+            self,
+            convergence=(0,0,0),
+            cf=1000,
+            endbulb_class="tonic",
+            endbulb_pars=None,
+            threshold=-20,
+            record_voltages=False
+    ):
 
-        if debug:
-            print "GBC temperature:", h.celsius, "C"
-
+        log.info("GBC temperature: {} C".format(h.celsius))
 
         Lstd = 20
 
@@ -99,13 +106,13 @@ class GBC_Point(object):
             seg.pas.g = calc_tf(q10) * calc_conductivity_cm2(2e-9, 12e-12)
 
 
-        # Seting up synapses
+        ### Seting up synapses
         self._are_weights_set = False
         self._make_endbulbs(convergence, endbulb_class, endbulb_pars)
         self.cf = float(cf)
 
 
-        # Netcon for recording spikes
+        ### Netcon for recording spikes
         self._probe = h.NetCon(self.soma(0.5)._ref_v, None, threshold, 0, 0,
                                sec=self.soma)
         self._spikes = h.Vector()
@@ -113,19 +120,39 @@ class GBC_Point(object):
 
 
 
+        ### Optional membrane potential recording
+        if record_voltages:
+            log.info("Recording voltages is ON")
+
+            voltages = h.Vector()
+
+            voltages.record(self.soma(0.5)._ref_v)
+            self._voltages = voltages
+
+        else:
+            self._voltages = None
 
 
 
-    def get_spikes(self):
+
+    def get_trains(self):
         assert h.t != 0, "Time is 0 (did you run the simulation already?)"
 
-        train = np.array( [(np.array(self._spikes)*1e-3, h.t*1e-3, self.cf, 'gbc')],
-                          dtype=[('spikes', np.ndarray),
-                                 ('duration', float),
-                                 ('cf', float),
-                                 ('type', '|S3')]
-        )
-        return train
+        trains = pd.DataFrame([
+            {
+                'spikes': np.array(self._spikes)*1e-3,
+                'duration': h.t*1e-3,
+                'type': 'gbc',
+                'cf': self.cf
+            }
+        ])
+
+        return trains
+
+
+    def get_voltages(self):
+        voltages = np.array(self._voltages) * 1e-3
+        return voltages
 
 
 
@@ -259,19 +286,19 @@ class GBC_Point(object):
                 i = hsr_idx.pop(
                     np.random.randint(0, len(hsr_idx))
                 )
-                bulb['spikes'] = anf[i]['spikes']
+                bulb['spikes'] = anf['spikes'][i]
 
             elif bulb['type'] == 'msr':
                 i = msr_idx.pop(
                     np.random.randint(0, len(msr_idx))
                 )
-                bulb['spikes'] = anf[i]['spikes']
+                bulb['spikes'] = anf['spikes'][i]
 
             elif bulb['type'] == 'lsr':
                 i = lsr_idx.pop(
                     np.random.randint(0, len(lsr_idx))
                 )
-                bulb['spikes'] = anf[i]['spikes']
+                bulb['spikes'] = anf['spikes'][i]
 
 
 
