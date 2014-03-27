@@ -236,17 +236,25 @@ class GBC_Point(object):
 
 
     def set_endbulb_weights(self, weights):
+        """Set the synaptic weights.
+
+        Parameters
+        ----------
+        weights : tuple
+            Value of syanptic weights in siemens for (HSR, MSR, LSR) auditory nerve fibers.
+
+        """
         self._are_weights_set = True
 
         wh, wm, wl = weights
 
         for bulb in self._endbulbs:
             if bulb['type'] == 'hsr':
-                bulb['con'].weight[0] = wh
+                bulb['con'].weight[0] = 1e6 * wh
             elif bulb['type'] == 'msr':
-                bulb['con'].weight[0] = wm
+                bulb['con'].weight[0] = 1e6 * wm
             elif bulb['type'] == 'lsr':
-                bulb['con'].weight[0] = wl
+                bulb['con'].weight[0] = 1e6 * wl
 
 
 
