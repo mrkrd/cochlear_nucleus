@@ -236,17 +236,26 @@ class GBC_Point(object):
 
 
     def set_endbulb_weights(self, weights):
+        """Set the synaptic weights.
+
+        Parameters
+        ----------
+        weights : tuple
+            Value of syanptic weights in siemens for (HSR, MSR, LSR)
+            auditory nerve fibers.
+
+        """
         self._are_weights_set = True
 
         wh, wm, wl = weights
 
         for bulb in self._endbulbs:
             if bulb['type'] == 'hsr':
-                bulb['con'].weight[0] = wh
+                bulb['con'].weight[0] = 1e6 * wh
             elif bulb['type'] == 'msr':
-                bulb['con'].weight[0] = wm
+                bulb['con'].weight[0] = 1e6 * wm
             elif bulb['type'] == 'lsr':
-                bulb['con'].weight[0] = wl
+                bulb['con'].weight[0] = 1e6 * wl
 
 
 
@@ -294,7 +303,8 @@ class GBC_Point(object):
         assert self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
 
         for bulb in self._endbulbs:
-            assert bulb.has_key('spikes'), "***** Not all endbulbs loaded with ANF spikes! *****"
+            if not bulb.has_key('spikes'):
+                raise RuntimeError("Not all endbulbs loaded with ANF spikes (did you call gbc.load_anf_trains()?)")
 
             for sp in bulb['spikes']:
                 bulb['con'].event(float(sp)*1e3)

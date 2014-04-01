@@ -1,12 +1,10 @@
 from gbc import (
-    GBCs_RothmanManis2003,
     make_gbc_group,
     make_gbcs,
     get_weight,
 )
 
 from anf import (
-    ANFs,
     make_anf_group,
     make_anfs
 )
@@ -30,25 +28,26 @@ def set_fs(fs):
     brian.defaultclock.dt = (1/fs) * second
 
 def reset_defaultclock():
-    brian.defaultclock.t = 0*second
+    brian.defaultclock.t = 0 * second
 
 reset = reset_defaultclock
 
-def run(groups, duration=None, **kwargs):
+
+def run(duration, objects, **kwargs):
+    """Run Brian simulation
+
+    Parameters
+    ----------
+    duration : float
+        Duration of the simulation in seconds.
+    objects : list
+        A collection of Brian objects to be simulated.
+
+    """
 
     brian.defaultclock.t = 0 * second
 
-    brian_objects = []
-
-    for group in groups:
-
-        if (duration is None) and isinstance(group, ANFs):
-            duration = th.get_duration(group.meta)
-
-        brian_objects.append(group.brian_objects)
-
-
-    net = brian.Network(brian_objects)
+    net = brian.Network(objects)
 
     kwargs.setdefault('report', 'text')
     kwargs.setdefault('report_period', 1)
