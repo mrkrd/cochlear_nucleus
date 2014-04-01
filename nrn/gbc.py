@@ -71,7 +71,6 @@ class GBC_Point(object):
             convergence=(0,0,0),
             cf=1000,
             endbulb_class="tonic",
-            endbulb_pars=None,
             threshold=-20,
             record_voltages=False
     ):
@@ -108,7 +107,7 @@ class GBC_Point(object):
 
         ### Seting up synapses
         self._are_weights_set = False
-        self._make_endbulbs(convergence, endbulb_class, endbulb_pars)
+        self._make_endbulbs(convergence, endbulb_class)
         self.cf = float(cf)
 
 
@@ -156,7 +155,7 @@ class GBC_Point(object):
 
 
 
-    def _make_endbulbs(self, convergence, endbulb_class, endbulb_pars=None):
+    def _make_endbulbs(self, convergence, endbulb_class):
         """ convergence: (hsr, msr, lsr) """
         assert isinstance(convergence, tuple)
 
@@ -169,37 +168,39 @@ class GBC_Point(object):
         if endbulb_class in ("expsyn", "non-depressing", "tonic"):
             endbulb_class = "tonic"
             EndbulbClass = h.ExpSyn
-            if endbulb_pars is None:
-                endbulb_pars = {'e': 0, 'tau': 0.2}
+            endbulb_pars = {'e': 0, 'tau': 0.2}
         elif endbulb_class in ("recov2exp", "yang2009"):
             endbulb_class = "yang2009"
             EndbulbClass = h.Recov2Exp
-            if endbulb_pars is None:
-                endbulb_pars = {'e': 0,
-                                'tau': 0.2,
-                                'tau_fast': 26,
-                                'tau_slow': 1000,
-                                'U': 0.47,
-                                'k': 0.6}
+            endbulb_pars = {
+                'e': 0,
+                'tau': 0.2,
+                'tau_fast': 26,
+                'tau_slow': 1000,
+                'U': 0.47,
+                'k': 0.6
+            }
         elif endbulb_class in ("little-depressing", "10%-depressing"):
             endbulb_class = '10%-depressing'
             EndbulbClass = h.RecovExp
-            if endbulb_pars is None:
-                # tau_rec, U: calclated analytically for 10%
-                # depression @ 300Hz
-                endbulb_pars = {"e": 0,
-                                "tau": 0.2,
-                                "tau_rec": 5.7858390699913,
-                                "U": 0.086568968290663}
+            # tau_rec, U: calclated analytically for 10%
+            # depression @ 300Hz
+            endbulb_pars = {
+                "e": 0,
+                "tau": 0.2,
+                "tau_rec": 5.7858390699913,
+                "U": 0.086568968290663
+            }
         elif endbulb_class == "20%-depressing":
             EndbulbClass = h.RecovExp
-            if endbulb_pars is None:
-                # tau_rec, U: calclated analytically for 20%
-                # depression @ 300Hz
-                endbulb_pars = {"e": 0,
-                                "tau": 0.2,
-                                "tau_rec": 6.7600326478197,
-                                "U": 0.15934371552475}
+            # tau_rec, U: calclated analytically for 20%
+            # depression @ 300Hz
+            endbulb_pars = {
+                "e": 0,
+                "tau": 0.2,
+                "tau_rec": 6.7600326478197,
+                "U": 0.15934371552475
+            }
         else:
             assert False, "Synapse \"%s\" not implemented"%endbulb_class
 
@@ -218,8 +219,6 @@ class GBC_Point(object):
             )
 
 
-        self.set_endbulb_pars(endbulb_pars)
-
         weight_key = (endbulb_class, convergence)
         if weight_key in self._default_weights:
             self.set_endbulb_weights(
@@ -236,32 +235,19 @@ class GBC_Point(object):
 
 
 
-    def set_endbulb_weights(self, w):
+    def set_endbulb_weights(self, weights):
         self._are_weights_set = True
 
-        if isinstance(w, float) or isinstance(w, int):
-            for bulb in self._endbulbs:
-                bulb['con'].weight[0] = w
+        wh, wm, wl = weights
 
-        elif isinstance(w, tuple):
-            wh, wm, wl = w
+        for bulb in self._endbulbs:
+            if bulb['type'] == 'hsr':
+                bulb['con'].weight[0] = wh
+            elif bulb['type'] == 'msr':
+                bulb['con'].weight[0] = wm
+            elif bulb['type'] == 'lsr':
+                bulb['con'].weight[0] = wl
 
-            for bulb in self._endbulbs:
-                if bulb['type'] == 'hsr':
-                    bulb['con'].weight[0] = wh
-                elif bulb['type'] == 'msr':
-                    bulb['con'].weight[0] = wm
-                elif bulb['type'] == 'lsr':
-                    bulb['con'].weight[0] = wl
-
-        elif isinstance(w, list):
-            assert len(w) == len(self._endbulbs)
-
-            for wi,bulb in zip(w, self._endbulbs):
-                bulb['con'].weight[0] = wi
-
-        else:
-            assert False
 
 
 
@@ -327,79 +313,3 @@ def calc_conductivity_cm2(conductance, capacity):
 
     conductivity = conductance / area # [S/cm2]
     return conductivity
-
-
-
-
-
-def main():
-    h.celsius = 37
-
-    gbc = GBC_Point((2,1,1), cf=1000)
-
-    pars = {'e':0, 'tau':0.2}
-    gbc.set_endbulb_pars(pars)
-
-
-    weights = (0.06, 0.005, 0.003)
-    gbc.set_endbulb_weights(weights)
-
-
-    anf = [
-        (np.array([10,20])*1e-3, 'hsr', 1000, 100e-3),
-        (np.array([30,40])*1e-3, 'hsr', 1000, 100e-3),
-        (np.array([50,60])*1e-3, 'hsr', 3333, 100e-3),
-        (np.array([70,80])*1e-3, 'msr', 1000, 100e-3),
-        (np.array([90,100])*1e-3, 'msr', 2222, 100e-3),
-        (np.array([60,50])*1e-3, 'lsr', 1000, 100e-3)
-    ]
-    anf = np.rec.array(anf, dtype=[('spikes', np.ndarray),
-                                   ('type', '|S3'),
-                                   ('cf', float),
-                                   ('duration', float)])
-
-    print
-    print "ANFs before"
-    print anf
-
-
-    gbc.load_anf_trains(anf)
-
-    v = h.Vector()
-    v.record(gbc.soma(0.5)._ref_v)
-
-    neuron.init()
-    gbc.init()
-    neuron.run(100)
-
-    print
-    print "ANFs after"
-    print anf
-
-    print
-    print "GBC voltage", gbc.soma(0.5).v
-    print
-    print "Output spike trains"
-    print gbc.get_spikes()
-    print
-    print "Rate:", th.rate(gbc.get_spikes())
-    print
-
-
-
-    a = gbc.get_spikes()
-    b = gbc.get_spikes()
-
-    print np.concatenate([a, b]).dtype
-
-    print "g_kht", calc_conductivity_cm2(150e-9, 12e-12)
-
-    plt.plot(v)
-    plt.show()
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    import mrlib.thorns as th
-
-    main()
