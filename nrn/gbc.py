@@ -304,7 +304,7 @@ class GBC_Point(object):
 
         for bulb in self._endbulbs:
             if not bulb.has_key('spikes'):
-                raise  RuntimeError("Not all endbulbs loaded with ANF spikes (did you call gbc.load_anf_trains()?)")
+                raise RuntimeError("Not all endbulbs loaded with ANF spikes (did you call gbc.load_anf_trains()?)")
 
             for sp in bulb['spikes']:
                 bulb['con'].event(float(sp)*1e3)
