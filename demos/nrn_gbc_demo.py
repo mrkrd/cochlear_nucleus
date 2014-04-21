@@ -26,7 +26,7 @@ def main():
 
 
     gbc.set_endbulb_weights(
-        (0.06, 0.005, 0.003)
+        (6e-8, 5e-8, 3e-8)
     )
 
 

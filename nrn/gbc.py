@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-from __future__ import division
+from __future__ import division, print_function, absolute_import
 __author__ = "Marek Rudnicki"
 
 import numpy as np
 import pandas as pd
+import os
 
 import neuron
 from neuron import h
@@ -17,64 +18,35 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
 
+lib_dir = os.path.dirname(__file__)
+
+
 class GBC_Point(object):
-    _default_weights = (
+    """Make a globular bushy cell model.
 
-        {('10%-depressing', (16, 2, 2)): (0.0072790147819572215,
-                                          0.01300363406907902,
-                                          0.025077761219112135),
-         ('10%-depressing', (24, 3, 3)): (0.0060803036590587464,
-                                          0.011064608209339638,
-                                          0.022960611280205795),
-         ('10%-depressing', (32, 4, 4)): (0.0052627911610534182,
-                                          0.009997284283591602,
-                                          0.019772102754783479),
-         ('10%-depressing', (40, 5, 5)): (0.0047530380948505235,
-                                          0.0093045639569898642,
-                                          0.018217731766975283),
-         ('tonic', (0, 0, 20)): (0.0, 0.0, 0.070062207003387347),
-         ('tonic', (0, 0, 40)): (0.0, 0.0, 0.084179665808960011),
-         ('tonic', (16, 2, 2)): (0.007038794817791418,
-                                 0.01266342935321116,
-                                 0.02541172424059597),
-         ('tonic', (20, 0, 0)): (0.0066033045079881593, 0.0, 0.0),
-         ('tonic', (24, 3, 3)): (0.0058733536098521466,
-                                 0.010682710448933506,
-                                 0.021856493947204871),
-         ('tonic', (32, 4, 4)): (0.0051942288176696858,
-                                 0.009887290059422231,
-                                 0.019580587912241685),
-         ('tonic', (40, 0, 0)): (0.0047561806622803005, 0.0, 0.0),
-         ('tonic', (40, 5, 5)): (0.0046037072220965133,
-                                 0.0093309748057562245,
-                                 0.017105117399478547),
-         ('yang2009', (16, 2, 2)): (0.014024066512624741,
-                                          0.035801613002810206,
-                                          0.21464383648564361),
-         ('yang2009', (24, 3, 3)): (0.014151826854560337,
-                                          0.013762257387782693,
-                                          0.10069232021044561),
-         ('yang2009', (32, 4, 4)): (0.012441810052544041,
-                                          0.013691620281564799,
-                                          0.086407868314042346),
-         ('yang2009', (40, 5, 5)): (0.011215341103431862,
-                                          0.011607518306086639,
-                                          0.089115665231745828)}
+    Parameters
+    ----------
+    convergence : tuple of int
+        Number of input (HSR, MSR, LSR) auditory nerve fibers.
+    cf : float
+        Characteristic frequency of the cell
+    endbulb_class : {'tonic', 'yang2009', '10%-depressing'}, optional
+        Type of the endbulb synapses.
+    threshold : float, optional
+        Spike detection threshold.
+    record_voltages : bool, optional
+        If True, records membrane potentials.  See `get_voltages()`.
 
-
-    )
-
-
+    """
 
     def __init__(
             self,
-            convergence=(0,0,0),
-            cf=1000,
+            convergence,
+            cf,
             endbulb_class="tonic",
             threshold=-20,
             record_voltages=False
     ):
-
         log.info("GBC temperature: {} C".format(h.celsius))
 
         Lstd = 20
@@ -156,12 +128,19 @@ class GBC_Point(object):
 
 
     def _make_endbulbs(self, convergence, endbulb_class):
-        """ convergence: (hsr, msr, lsr) """
+
         assert isinstance(convergence, tuple)
 
         hsr_num, msr_num, lsr_num = convergence
 
-        # Endbulbs will be stored here
+
+        default_weights = pd.read_csv(
+            os.path.join(lib_dir, "endbulb_weights.csv"),
+            index_col=['endbulb_class','hsr_num','msr_num','lsr_num']
+        )
+
+
+        ### Endbulbs will be stored here
         self._endbulbs = []
 
 
@@ -219,11 +198,15 @@ class GBC_Point(object):
             )
 
 
-        weight_key = (endbulb_class, convergence)
-        if weight_key in self._default_weights:
-            self.set_endbulb_weights(
-                self._default_weights[weight_key]
-            )
+        ### Set the weights (if default values available)
+        weight_key = (endbulb_class, hsr_num, msr_num, lsr_num)
+        if weight_key in default_weights.index.tolist():
+
+            ### Select weights and set the right order
+            sel = default_weights.loc[weight_key]
+            weights = (sel.weight_hsr, sel.weight_msr, sel.weight_lsr)
+
+            self.set_endbulb_weights(weights)
 
 
     def set_endbulb_pars(self, endbulb_pars):
