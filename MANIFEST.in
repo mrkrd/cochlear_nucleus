@@ -1,0 +1,2 @@
+include cochlear_nucleus/nrn/endbulb_weights.csv
+recursive-include cochlear_nucleus/nrn/*.mod

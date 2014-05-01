@@ -2,3 +2,5 @@ amd64
 x86_64
 *.pyc
 *.orig
+*.egg-info
+dist
