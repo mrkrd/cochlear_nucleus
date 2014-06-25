@@ -16,7 +16,7 @@ from brian import (
 )
 
 
-import mrlib.thorns as th
+import thorns as th
 
 
 brian.set_global_preferences(
