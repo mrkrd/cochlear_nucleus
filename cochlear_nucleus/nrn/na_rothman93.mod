@@ -38,7 +38,7 @@ INITIAL {
 
 BREAKPOINT {
     SOLVE states METHOD cnexp
-    ina = gnabar*m*m*m*h*(v - ena)
+    ina = gnabar*m*m*h*(v - ena)
 }
 
 DERIVATIVE states {
