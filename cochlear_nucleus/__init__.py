@@ -1,3 +1,10 @@
+from __future__ import print_function, absolute_import, division
+
+
+__author__ = "Marek Rudnicki"
+__version__ = "0.1"
+
+
 from gbc import (
     make_gbc_group,
     make_gbcs,
@@ -16,12 +23,6 @@ from brian import (
 )
 
 
-import thorns as th
-
-
-brian.set_global_preferences(
-    usecodegen=True
-)
 
 
 def set_fs(fs):
