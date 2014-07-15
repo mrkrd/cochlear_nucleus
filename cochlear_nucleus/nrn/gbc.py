@@ -67,6 +67,7 @@ class GBC_Point(object):
         self.soma.ena = 50
         self.soma.e_pas = -65
 
+        h.q10_na_rothman93 = 3.9
 
         q10 = 1.5
         for seg in self.soma:
