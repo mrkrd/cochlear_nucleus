@@ -53,7 +53,7 @@ class GBC_Point(object):
 
         self.soma = h.Section()
 
-        self.soma.insert('na_rothman93')
+        self.soma.insert('na_spirou2005')
         self.soma.insert('kht')
         self.soma.insert('klt')
         self.soma.insert('ih')
@@ -67,11 +67,11 @@ class GBC_Point(object):
         self.soma.ena = 50
         self.soma.e_pas = -65
 
-        h.q10_na_rothman93 = 3.9
+        h.q10_na_spirou2005 = 2.2
 
         q10 = 1.5
         for seg in self.soma:
-            seg.na_rothman93.gnabar = calc_tf(q10) * calc_conductivity_cm2(2500e-9, 12e-12)
+            seg.na_spirou2005.gnabar = calc_tf(q10) * calc_conductivity_cm2(2500e-9, 12e-12)
             seg.kht.gkhtbar = calc_tf(q10) * calc_conductivity_cm2(150e-9, 12e-12)
             seg.klt.gkltbar = calc_tf(q10) * calc_conductivity_cm2(200e-9, 12e-12)
             seg.ih.ghbar = calc_tf(q10) * calc_conductivity_cm2(20e-9, 12e-12)
