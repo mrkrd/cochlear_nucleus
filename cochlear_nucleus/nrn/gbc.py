@@ -130,8 +130,6 @@ class GBC_Point(object):
 
     def _make_endbulbs(self, convergence, endbulb_class):
 
-        assert isinstance(convergence, tuple)
-
         hsr_num, msr_num, lsr_num = convergence
 
 
@@ -182,7 +180,7 @@ class GBC_Point(object):
                 "U": 0.15934371552475
             }
         else:
-            assert False, "Synapse \"%s\" not implemented"%endbulb_class
+            raise NotImplementedError("Synapse class not implemented: {}".format(endbulb_class))
 
         anf_types = (['hsr' for each in range(hsr_num)] +
                      ['msr' for each in range(msr_num)] +
@@ -197,6 +195,11 @@ class GBC_Point(object):
                  'syn': syn,
                  'con': h.NetCon(None, syn)}
             )
+
+
+
+        ### Set the endbulb parameters
+        self.set_endbulb_pars(endbulb_pars)
 
 
         ### Set the weights (if default values available)
