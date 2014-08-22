@@ -208,7 +208,7 @@ class GBC_Point(object):
 
             ### Select weights and set the right order
             sel = default_weights.loc[weight_key]
-            weights = (sel.weight_hsr, sel.weight_msr, sel.weight_lsr)
+            weights = (sel.hsr_weight, sel.msr_weight, sel.lsr_weight)
 
             self.set_endbulb_weights(weights)
 
