@@ -9,7 +9,7 @@ __version__ = "0.1"
 from . gbc import (
     make_gbc_group,
     make_gbcs,
-    get_weight,
+    synaptic_weight,
 )
 
 from . anf import (
