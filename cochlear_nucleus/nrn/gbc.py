@@ -315,9 +315,23 @@ def calc_conductivity_cm2(conductance, capacity):
 def recovexp_pars(stim_freq_max, depression_max, tau_depression):
     """Calculate parameters of a single exponenetial recovery synapse.
 
-    TODO: parameters
-    """
+    Parameters
+    ----------
+    stim_freq_max : float
+        Stimulus frequency (Hz).
+    depression_max : float
+        Assymptotic deperssion level.
+    tau_depression : float
+        Time constant of the depression (s)
 
+    Returns
+    -------
+    u : float
+        Release probability.
+    tau_rec : float
+        Recovery time constant (s).
+
+    """
     I = depression_max
     tau_a = tau_depression
     f = stim_freq_max

@@ -29,10 +29,11 @@ def test_recovexp_pars():
     )
 
     # Desired values calcualted using Maxima using:
+    #
     # f: 300$
     # I: 0.8$
     # tau_A: 0.005$
-
+    #
     # eq1: I = 1 - ( p / (exp( 1 / (f * tau )) - 1 + p ))$
     # eq2: tau_A = 1 / ( 1/tau - f*(log(1-p)) )$
     # s: solve( [eq1,eq2], [p,tau] );
