@@ -310,3 +310,21 @@ def calc_conductivity_cm2(conductance, capacity):
 
     conductivity = conductance / area # [S/cm2]
     return conductivity
+
+
+def recovexp_pars(stim_freq_max, depression_max, tau_depression):
+    """Calculate parameters of a single exponenetial recovery synapse.
+
+    TODO: parameters
+    """
+
+    I = depression_max
+    tau_a = tau_depression
+    f = stim_freq_max
+
+    x = (I - 1)*np.exp(1/(f*tau_a))
+
+    u = (x - I + 1)/(x - I)
+    tau_rec = tau_a/(f*tau_a*np.log(1 - u) + 1)
+
+    return u, tau_rec
