@@ -22,7 +22,7 @@ lib_dir = os.path.dirname(__file__)
 
 
 class GBC_Point(object):
-    """Make a globular bushy cell model.
+    """Model of a globular bushy cell.
 
     Parameters
     ----------
@@ -30,7 +30,7 @@ class GBC_Point(object):
         Number of input (HSR, MSR, LSR) auditory nerve fibers.
     cf : float
         Characteristic frequency of the cell
-    endbulb_class : {'tonic', 'yang2009', '10%-depressing'}, optional
+    endbulb_class : {'tonic', 'yang2009', 'X%-depressing'}, optional
         Type of the endbulb synapses.
     threshold : float, optional
         Spike detection threshold.
@@ -38,7 +38,6 @@ class GBC_Point(object):
         If True, records membrane potentials.  See `get_voltages()`.
 
     """
-
     def __init__(
             self,
             convergence,
@@ -158,27 +157,25 @@ class GBC_Point(object):
                 'U': 0.47,
                 'k': 0.6
             }
-        elif endbulb_class in ("little-depressing", "10%-depressing"):
-            endbulb_class = '10%-depressing'
+        elif endbulb_class.endswith("%-depressing"):
+            depression_percent = int(endbulb_class.split('%')[0])
+            relative_min_amplitude = 1 - depression_percent/100
+
             EndbulbClass = h.RecovExp
-            # tau_rec, U: calclated analytically for 10%
-            # depression @ 300Hz
+
+            u, tau_rec = recovexp_pars(
+                stim_freq_max=300, # Hz
+                relative_min_amplitude=relative_min_amplitude,
+                tau_depression=0.005, # s
+            )
+            print(u, tau_rec)
             endbulb_pars = {
-                "e": 0,
-                "tau": 0.2,
-                "tau_rec": 5.7858390699913,
-                "U": 0.086568968290663
+                'e': 0,
+                'tau': 0.2,             # ms
+                'tau_rec': tau_rec*1e3, # s -> ms
+                'U': u,
             }
-        elif endbulb_class == "20%-depressing":
-            EndbulbClass = h.RecovExp
-            # tau_rec, U: calclated analytically for 20%
-            # depression @ 300Hz
-            endbulb_pars = {
-                "e": 0,
-                "tau": 0.2,
-                "tau_rec": 6.7600326478197,
-                "U": 0.15934371552475
-            }
+
         else:
             raise NotImplementedError("Synapse class not implemented: {}".format(endbulb_class))
 
@@ -227,14 +224,19 @@ class GBC_Point(object):
 
         Parameters
         ----------
-        weights : tuple
+        weights : tuple, float
             Value of syanptic weights in siemens for (HSR, MSR, LSR)
             auditory nerve fibers.
 
         """
         self._are_weights_set = True
 
-        wh, wm, wl = weights
+        if isinstance(weights, float):
+            wh = weights
+            wm = weights
+            wl = weights
+        else:
+            wh, wm, wl = weights
 
         for bulb in self._endbulbs:
             if bulb['type'] == 'hsr':
@@ -312,15 +314,15 @@ def calc_conductivity_cm2(conductance, capacity):
     return conductivity
 
 
-def recovexp_pars(stim_freq_max, depression_max, tau_depression):
+def recovexp_pars(stim_freq_max, relative_min_amplitude, tau_depression):
     """Calculate parameters of a single exponenetial recovery synapse.
 
     Parameters
     ----------
     stim_freq_max : float
         Stimulus frequency (Hz).
-    depression_max : float
-        Assymptotic deperssion level.
+    relative_min_amplitude : float
+        Assymptotic amplitude normalized to the first spike.
     tau_depression : float
         Time constant of the depression (s)
 
@@ -332,7 +334,7 @@ def recovexp_pars(stim_freq_max, depression_max, tau_depression):
         Recovery time constant (s).
 
     """
-    I = depression_max
+    I = relative_min_amplitude
     tau_a = tau_depression
     f = stim_freq_max
 

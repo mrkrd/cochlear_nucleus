@@ -24,7 +24,7 @@ def test_recovexp_pars():
 
     u, tau_rec = recovexp_pars(
         stim_freq_max=300,
-        depression_max=0.8,
+        relative_min_amplitude=0.8,
         tau_depression=0.005
     )
 
