@@ -146,17 +146,31 @@ class GBC_Point(object):
             endbulb_class = "tonic"
             EndbulbClass = h.ExpSyn
             endbulb_pars = {'e': 0, 'tau': 0.2}
+
         elif endbulb_class in ("recov2exp", "yang2009"):
             endbulb_class = "yang2009"
             EndbulbClass = h.Recov2Exp
             endbulb_pars = {
-                'e': 0,
-                'tau': 0.2,
-                'tau_fast': 26,
-                'tau_slow': 1000,
+                'e': 0,           # mV
+                'tau': 0.2,       # ms
+                'tau_fast': 26,   # ms
+                'tau_slow': 1000, # ms
                 'U': 0.47,
-                'k': 0.6
+                'k': 0.6,
             }
+
+        elif endbulb_class == "yang2009mean":
+            endbulb_class = "yang2009mean"
+            EndbulbClass = h.Recov2Exp
+            endbulb_pars = {
+                'e': 0,           # mV
+                'tau': 0.2,       # ms
+                'tau_fast': 10.9, # ms
+                'tau_slow': 1990, # ms
+                'U': 0.6,
+                'k': 0.3,
+            }
+
         elif endbulb_class.endswith("%-depressing"):
             depression_percent = int(endbulb_class.split('%')[0])
             relative_min_amplitude = 1 - depression_percent/100
@@ -168,7 +182,7 @@ class GBC_Point(object):
                 relative_min_amplitude=relative_min_amplitude,
                 tau_depression=0.005, # s
             )
-            print(u, tau_rec)
+
             endbulb_pars = {
                 'e': 0,
                 'tau': 0.2,             # ms
@@ -314,12 +328,12 @@ def calc_conductivity_cm2(conductance, capacity):
     return conductivity
 
 
-def recovexp_pars(stim_freq_max, relative_min_amplitude, tau_depression):
+def recovexp_pars(stim_freq, relative_min_amplitude, tau_depression):
     """Calculate parameters of a single exponenetial recovery synapse.
 
     Parameters
     ----------
-    stim_freq_max : float
+    stim_freq : float
         Stimulus frequency (Hz).
     relative_min_amplitude : float
         Assymptotic amplitude normalized to the first spike.
@@ -336,7 +350,7 @@ def recovexp_pars(stim_freq_max, relative_min_amplitude, tau_depression):
     """
     I = relative_min_amplitude
     tau_a = tau_depression
-    f = stim_freq_max
+    f = stim_freq
 
     x = (I - 1)*np.exp(1/(f*tau_a))
 
