@@ -168,7 +168,7 @@ class GBC_Point(object):
                 'tau_fast': 10.9, # ms
                 'tau_slow': 1990, # ms
                 'U': 0.6,
-                'k': 0.3,
+                'k': 0.6,
             }
 
         elif endbulb_class.endswith("%-depressing"):
