@@ -14,34 +14,36 @@ from scipy import interpolate
 import numpy.testing as npt
 
 import cochlear_nucleus as cn
-from cochlear_nucleus.nrn.gbc import recovexp_pars
+from cochlear_nucleus.nrn.gbc import recovexp_release_probability
 
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
 
-def test_recovexp_pars():
+def test_recovexp_release_probability():
 
-    u, tau_rec = recovexp_pars(
+    u = recovexp_release_probability(
         stim_freq=300,
         relative_min_amplitude=0.8,
-        tau_depression=0.005
+        tau_rec=0.0109,
     )
 
     # Desired values calcualted using Maxima using:
     #
-    # f: 300$
-    # I: 0.8$
-    # tau_A: 0.005$
-    #
     # eq1: I = 1 - ( p / (exp( 1 / (f * tau )) - 1 + p ))$
     # eq2: tau_A = 1 / ( 1/tau - f*(log(1-p)) )$
-    # s: solve( [eq1,eq2], [p,tau] );
+
+    # s: solve( [eq1,eq2], [p,tau_A] );
+
+    # f: 300$
+    # I: 0.8$
+    # tau: 0.0109$
+
+    # s: solve( [eq1,eq2], [p,tau_A] );
     # s, float;
 
-    assert_almost_equal(u, .1593437155247479, decimal=16)
-    assert_equal(tau_rec, .006760032647819741)
 
+    assert_almost_equal(u, .08943121354696501, decimal=15)
 
 
 

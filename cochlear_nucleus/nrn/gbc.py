@@ -174,13 +174,14 @@ class GBC_Point(object):
         elif endbulb_class.endswith("%-depressing"):
             depression_percent = int(endbulb_class.split('%')[0])
             relative_min_amplitude = 1 - depression_percent/100
+            tau_rec = 0.0109  # mean value from Yang et al. (2009) (s)
 
             EndbulbClass = h.RecovExp
 
-            u, tau_rec = recovexp_pars(
-                stim_freq_max=300, # Hz
+            u = recovexp_release_probability(
+                stim_freq=300, # max ANF firing rate (Hz)
                 relative_min_amplitude=relative_min_amplitude,
-                tau_depression=0.005, # s
+                tau_rec=tau_rec,
             )
 
             endbulb_pars = {
@@ -328,8 +329,9 @@ def calc_conductivity_cm2(conductance, capacity):
     return conductivity
 
 
-def recovexp_pars(stim_freq, relative_min_amplitude, tau_depression):
-    """Calculate parameters of a single exponenetial recovery synapse.
+def recovexp_release_probability(stim_freq, relative_min_amplitude, tau_rec):
+    """Calculate neurotransmitter release probability of a single
+    exponenetial recovery synapse.
 
     Parameters
     ----------
@@ -337,24 +339,20 @@ def recovexp_pars(stim_freq, relative_min_amplitude, tau_depression):
         Stimulus frequency (Hz).
     relative_min_amplitude : float
         Assymptotic amplitude normalized to the first spike.
-    tau_depression : float
-        Time constant of the depression (s)
-
-    Returns
-    -------
-    u : float
-        Release probability.
     tau_rec : float
         Recovery time constant (s).
 
+    Returns
+    -------
+    float
+        Release probability.
+
     """
     I = relative_min_amplitude
-    tau_a = tau_depression
     f = stim_freq
 
-    x = (I - 1)*np.exp(1/(f*tau_a))
+    x = np.exp(1/(f*tau_rec))
 
-    u = (x - I + 1)/(x - I)
-    tau_rec = tau_a/(f*tau_a*np.log(1 - u) + 1)
+    u = -((x - 1)*I - x + 1)/I
 
-    return u, tau_rec
+    return u
