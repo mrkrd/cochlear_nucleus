@@ -9,4 +9,4 @@ from __future__ import unicode_literals
 __author__ = "Marek Rudnicki"
 __copyright__ = "Copyright 2015, Marek Rudnicki"
 __license__ = "GPLv3+"
-__version__ = "0.2"
+__version__ = "1.0"
