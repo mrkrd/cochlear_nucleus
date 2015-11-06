@@ -13,7 +13,7 @@ import brian
 from brian import siemens
 
 import cochlea
-import cochlear_nucleus as cn
+import cochlear_nucleus.brn as cn
 import thorns as th
 import thorns.waves as wv
 
