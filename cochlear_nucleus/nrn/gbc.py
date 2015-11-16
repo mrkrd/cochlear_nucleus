@@ -1,6 +1,8 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from __future__ import division, print_function, absolute_import
+from __future__ import unicode_literals
+
 __author__ = "Marek Rudnicki"
 
 import numpy as np
@@ -48,7 +50,7 @@ class GBC_Point(object):
     ):
         log.info("GBC temperature: {} C".format(h.celsius))
 
-        Lstd = 20
+        Lstd = 20               # µm
 
         self.soma = h.Section()
 
@@ -58,13 +60,13 @@ class GBC_Point(object):
         self.soma.insert('ih')
         self.soma.insert('pas')
 
-        self.soma.L = Lstd
-        self.soma.Ra = 150.0
-        self.soma.diam = Lstd
-        self.soma.cm = 0.9
-        self.soma.ek = -77
-        self.soma.ena = 50
-        self.soma.e_pas = -65
+        self.soma.L = Lstd      # µm
+        self.soma.Ra = 150.0    # Ω·cm
+        self.soma.diam = Lstd   # µm
+        self.soma.cm = 0.9      # µF/cm²
+        self.soma.ek = -77      # mV
+        self.soma.ena = 50      # mV
+        self.soma.e_pas = -65   # mV
 
         h.q10_na_spirou2005 = 2.5
 
