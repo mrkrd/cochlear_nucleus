@@ -2,3 +2,7 @@
 * DONE Move Brian models to cochlear_nucleus.brn name space
 
 <2015-11-06 Fri 12:12>
+
+* Cleanup/check calc_conductivity_cm2 and units
+
+* Unit test with cn.nrn.GBC_Point()
