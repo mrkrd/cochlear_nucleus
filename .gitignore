@@ -5,3 +5,4 @@ x86_64
 *.egg-info
 dist
 build
+.cache
