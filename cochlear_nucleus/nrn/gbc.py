@@ -176,7 +176,8 @@ class GBC_Point(object):
         elif endbulb_class.endswith("%-depressing"):
             depression_percent = int(endbulb_class.split('%')[0])
             relative_min_amplitude = 1 - depression_percent/100
-            tau_rec = 0.0109  # mean value from Yang et al. (2009) (s)
+            # tau_rec = 0.0109  # mean value from Yang et al. (2009) (s)
+            tau_rec = 0.09      # (s) Yang2015, Hermann2009
 
             EndbulbClass = h.RecovExp
 
