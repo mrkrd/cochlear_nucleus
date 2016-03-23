@@ -1,5 +1,4 @@
 COMMENT
-Time-stamp: <2011-04-05 16:09:44 marek>
 Author: Marek Rudnicki
 
 Description:
@@ -54,8 +53,8 @@ DERIVATIVE state {
 
 NET_RECEIVE(weight (umho), G (umho), t0 (ms)) {
     INITIAL {
-	t0 = 0
-	G = weight / (1-U)
+        G = weight / (1-U)
+        t0 = 0
     }
 
     G = G*(1-U)*exp(-(t-t0)/tau_rec) + weight*(1-exp(-(t-t0)/tau_rec))
