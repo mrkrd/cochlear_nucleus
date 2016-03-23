@@ -48,9 +48,11 @@ class GBC_Point(object):
             threshold=-20,
             record_voltages=False
     ):
-        log.info("GBC temperature: {} C".format(h.celsius))
+        log.info("GBC temperature: {}°C".format(h.celsius))
 
         Lstd = 20               # µm
+
+        self._vrest = -1e3 * 0.0654337694167 # mV
 
         self.soma = h.Section()
 
@@ -67,6 +69,7 @@ class GBC_Point(object):
         self.soma.ek = -77      # mV
         self.soma.ena = 50      # mV
         self.soma.e_pas = -65   # mV
+        self.soma.v = self._vrest
 
         h.q10_na_spirou2005 = 2.5
 
@@ -309,6 +312,8 @@ class GBC_Point(object):
 
     def init(self):
         assert self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
+
+        self.soma.v = self._vrest
 
         for bulb in self._endbulbs:
             if not bulb.has_key('spikes'):
