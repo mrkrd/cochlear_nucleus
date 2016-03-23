@@ -308,12 +308,14 @@ class GBC_Point(object):
 
 
 
-
-
-    def init(self):
-        assert self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
-
+    def pre_init(self):
+        "Run before neuron.init()."
         self.soma.v = self._vrest
+
+
+    def post_init(self):
+        "Run after neuron.init()."
+        assert self._are_weights_set, "Synaptic weights not set, use gbc.set_endbulb_weights()"
 
         for bulb in self._endbulbs:
             if not bulb.has_key('spikes'):
