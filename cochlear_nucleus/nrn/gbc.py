@@ -271,7 +271,8 @@ class GBC_Point(object):
 
 
 
-    def load_anf_trains(self, anf):
+    def load_anf_trains(self, anf, seed):
+        np.random.seed(seed)
 
         hsr_idx = np.where(
             (anf['type'] == 'hsr') & (anf['cf'] == self.cf)
