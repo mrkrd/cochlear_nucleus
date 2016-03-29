@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "cochlear_nucleus",
-    version = "1.2",
+    version = "1.3",
     author = "Marek Rudnicki",
     author_email = "marek.rudnicki@tum.de",
 
