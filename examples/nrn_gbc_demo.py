@@ -3,8 +3,6 @@
 
 from __future__ import division, absolute_import, print_function
 
-__author__ = "Marek Rudnicki"
-
 import numpy as np
 import pandas as pd
 
@@ -44,7 +42,7 @@ def main():
     print(anf_trains)
 
 
-    gbc.load_anf_trains(anf_trains)
+    gbc.load_anf_trains(anf_trains, seed=0)
 
 
     cn.run(

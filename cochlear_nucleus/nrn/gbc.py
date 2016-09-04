@@ -45,6 +45,7 @@ class GBC_Point(object):
             convergence,
             cf,
             endbulb_class="tonic",
+            target_spont_rate=7.5,
             threshold=-20,
             record_voltages=False
     ):
@@ -84,7 +85,7 @@ class GBC_Point(object):
 
         ### Seting up synapses
         self._are_weights_set = False
-        self._make_endbulbs(convergence, endbulb_class)
+        self._make_endbulbs(convergence, endbulb_class, target_spont_rate)
         self.cf = float(cf)
 
 
@@ -132,10 +133,9 @@ class GBC_Point(object):
 
 
 
-    def _make_endbulbs(self, convergence, endbulb_class):
+    def _make_endbulbs(self, convergence, endbulb_class, target_spont_rate):
 
         hsr_num, msr_num, lsr_num = convergence
-
 
         default_weights = pd.read_csv(
             os.path.join(lib_dir, "endbulb_weights.csv"),
@@ -222,7 +222,7 @@ class GBC_Point(object):
 
 
         ### Set the weights (if default values available)
-        weight_key = (endbulb_class, hsr_num, msr_num, lsr_num)
+        weight_key = (endbulb_class, hsr_num, msr_num, lsr_num, target_spont_rate)
         if weight_key in default_weights.index.tolist():
 
             ### Select weights and set the right order
