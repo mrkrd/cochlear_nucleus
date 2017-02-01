@@ -379,4 +379,8 @@ def recovexp_release_probability(stim_freq, relative_min_amplitude, tau_rec, spo
 
         u = -(((x1 - 1)*x2 - x1 + 1)*I + (1 - x1)*x2 + x1 - 1) / ((x1 - 1)*I - x2 + 1)
 
+
+    if u > 1:
+        raise ValueError("Release probability $u$ should not be greater than 1")
+
     return u
