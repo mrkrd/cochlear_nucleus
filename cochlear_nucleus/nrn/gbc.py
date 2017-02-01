@@ -139,7 +139,7 @@ class GBC_Point(object):
 
         default_weights = pd.read_csv(
             os.path.join(lib_dir, "endbulb_weights.csv"),
-            index_col=['endbulb_class','hsr_num','msr_num','lsr_num']
+            index_col=['endbulb_class','hsr_num','msr_num','lsr_num','target_spont_rate']
         )
 
 
@@ -222,7 +222,8 @@ class GBC_Point(object):
 
 
         ### Set the weights (if default values available)
-        weight_key = (endbulb_class, hsr_num, msr_num, lsr_num, target_spont_rate)
+        weight_key = (endbulb_class, hsr_num, msr_num, lsr_num, float(target_spont_rate))
+
         if weight_key in default_weights.index.tolist():
 
             ### Select weights and set the right order
