@@ -1,7 +1,7 @@
 cochlear_nucleus
 ================
 
-Computational models of `globular bushy cells`_ (GBCs) in `ventral
+Computational models of `globular bushy cells`_ (GBCs) in the `ventral
 cochlear nucleus`_.
 
 .. _`globular bushy cells`: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2518325/
@@ -20,20 +20,20 @@ nrn_gbc_demo_with_default_weights.py).
 Installation
 ------------
 
-Dependencies:
+Install the dependencies:
 
-  - Python 2.7
-  - Numpy
-  - NEURON (http://neuron.yale.edu/neuron/)
-  - Brian (http://briansimulator.org/)
+- Python 2.7
+- Numpy
+- NEURON (http://neuron.yale.edu/neuron/)
+- Brian (http://briansimulator.org/)
 
 
-Clone the repo with::
+Clone the git repo with::
 
   git clone https://github.com/mrkrd/cochlear_nucleus.git
   cd cochlear_nucleus
 
-Install the package::
+Install the package itself::
 
   python setup.py install --user
 
