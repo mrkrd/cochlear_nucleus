@@ -8,4 +8,3 @@
 * TODO Unit test with cn.nrn.GBC_Point()
 * TODO [#A] Update README and upload to GitHub
 * TODO Add a DOI
-* TODO Upload the package to PyPI

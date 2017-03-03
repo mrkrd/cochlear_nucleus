@@ -24,8 +24,8 @@ Install the dependencies:
 
 - Python 2.7
 - Numpy
-- NEURON (http://neuron.yale.edu/neuron/)
-- Brian (http://briansimulator.org/)
+- NEURON (with Python bindings): http://neuron.yale.edu/neuron/
+- Brian: http://briansimulator.org/
 
 
 Clone the git repo with::
@@ -33,11 +33,16 @@ Clone the git repo with::
   git clone https://github.com/mrkrd/cochlear_nucleus.git
   cd cochlear_nucleus
 
+Compile NEURON's models::
+
+  make
+
+or manually::
+
+  cd cochlear_nucleus/nrn && nrnivmodl
+  cd -
+
 Install the package itself::
-
-  python setup.py install --user
-
-or::
 
   python setup.py develop --user
 
