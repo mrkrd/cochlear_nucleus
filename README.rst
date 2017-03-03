@@ -55,6 +55,17 @@ A manuscript with simulations using *cochlear_nucleus* hast been
 accepted for publication in Frontiers in Computational Neuroscience.
 
 
+Acknowledgments
+---------------
+
+This work was supported by the German Research Foundation (DFG) within
+the Priority Program “Ultrafast and temporally precise information
+processing: normal and dysfunctional hearing” SPP 1608 (HE6713), the
+Technische Universität München within the funding programme Open
+Access Publishing, and the German Federal Ministry of Education and
+Research within the Munich Bernstein Center for Computational
+Neuroscience (reference number 01GQ1004B).
+
 
 License
 -------

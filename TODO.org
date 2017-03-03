@@ -6,5 +6,8 @@
 * TODO Cleanup/check calc_conductivity_cm2 and units
 
 * TODO Unit test with cn.nrn.GBC_Point()
-* TODO [#A] Update README and upload to GitHub
+* DONE [#A] Update README and upload to GitHub
+  CLOSED: [2017-03-03 Fri 17:15]
 * TODO Add a DOI
+* DONE Acknowledgments
+  CLOSED: [2017-03-03 Fri 20:32]
