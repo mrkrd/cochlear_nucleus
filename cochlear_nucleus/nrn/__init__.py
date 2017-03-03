@@ -1,7 +1,5 @@
 from __future__ import division
 
-__author__ = "Marek Rudnicki"
-
 import os
 
 import neuron

@@ -3,8 +3,6 @@
 
 from __future__ import division, absolute_import, print_function
 
-__author__ = "Marek Rudnicki"
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,7 +10,7 @@ import matplotlib.pyplot as plt
 import brian
 from brian import siemens
 
-import cochlear_nucleus as cn
+import cochlear_nucleus.brn as cn
 
 def main():
 

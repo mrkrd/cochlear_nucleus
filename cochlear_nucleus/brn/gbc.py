@@ -2,8 +2,6 @@
 
 from __future__ import division
 
-__author__ = "Marek Rudnicki"
-
 import numpy as np
 import random
 import pandas as pd

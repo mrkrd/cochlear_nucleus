@@ -3,8 +3,6 @@
 from __future__ import division, print_function, absolute_import
 from __future__ import unicode_literals
 
-__author__ = "Marek Rudnicki"
-
 import numpy as np
 import pandas as pd
 import os
