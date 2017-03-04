@@ -6,7 +6,8 @@
 * DONE Cleanup/check calc_conductivity_cm2 and units
   CLOSED: [2017-03-04 Sat 19:58]
 
-* TODO Unit test with cn.nrn.GBC_Point()
+* CANCELED Unit test with cn.nrn.GBC_Point()
+  CLOSED: [2017-03-04 Sat 19:59]
 * DONE [#A] Update README and upload to GitHub
   CLOSED: [2017-03-03 Fri 17:15]
 * DONE Add a DOI
