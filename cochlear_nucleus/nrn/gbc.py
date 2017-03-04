@@ -332,9 +332,28 @@ def calc_tf(q10, ref_temp=22):
     return tf
 
 
-def calc_conductivity_cm2(conductance, capacity):
-    cm = 0.9e-6                 # F/cm²
-    area = capacity / cm        # cm²
+def calc_conductivity_cm2(conductance, capacitance):
+    """Conductivity (S/cm²) of a membrane.
+
+    The return value can be used directly by most NEURON mechanisms.
+
+    Parameters
+    ----------
+    conductance : float
+        Conductance of the membrane in siemens (S).
+    capacitance : float
+        Capacitance of the membrane in farad (F).
+
+    Returns
+    -------
+    float
+        Conductivity in S/cm² that can be consumed by most NEURON
+        mechanisms.
+
+    """
+    # cm: typical neuronal specific membrane capacitance (F/cm²)
+    cm = 0.9e-6
+    area = capacitance / cm     # cm²
 
     conductivity = conductance / area # S/cm²
     return conductivity
