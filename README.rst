@@ -7,7 +7,7 @@ cochlear_nucleus
 A Python package implementing computational models of the `globular
 bushy cells`_ (GBCs) in the mammalian `ventral cochlear nucleus`_.
 Phenomenological models of endbulbs of Held with with short term
-synaptic depressions are implemented.
+synaptic depressions are also included.
 
 .. _`globular bushy cells`: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2518325/
 .. _`ventral cochlear nucleus`: https://en.wikipedia.org/wiki/Ventral_cochlear_nucleus
