@@ -1,8 +1,13 @@
 cochlear_nucleus
 ================
 
-Computational models of `globular bushy cells`_ (GBCs) in the `ventral
-cochlear nucleus`_.
+.. image:: https://zenodo.org/badge/24233/mrkrd/cochlear_nucleus.svg
+   :target: https://zenodo.org/badge/latestdoi/24233/mrkrd/cochlear_nucleus
+
+A Python package implementing computational models of the `globular
+bushy cells`_ (GBCs) in the mammalian `ventral cochlear nucleus`_.
+Phenomenological models of endbulbs of Held with with short term
+synaptic depressions are implemented.
 
 .. _`globular bushy cells`: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2518325/
 .. _`ventral cochlear nucleus`: https://en.wikipedia.org/wiki/Ventral_cochlear_nucleus
@@ -51,8 +56,21 @@ Install the package itself::
 Citing
 ------
 
-A manuscript with simulations using *cochlear_nucleus* hast been
-accepted for publication in Frontiers in Computational Neuroscience.
+Please use our DOI when citing the models (click on the link for a
+full reference):
+
+.. image:: https://zenodo.org/badge/24233/mrkrd/cochlear_nucleus.svg
+   :target: https://zenodo.org/badge/latestdoi/24233/mrkrd/cochlear_nucleus
+
+
+We also published a manuscript with simulations of GBCs using this
+software:
+
+`Rudnicki M and Hemmert W (2017)`_. *High entrainment constrains
+synaptic depression levels of an in vivo globular bushy cell
+model*. Front. Comput. Neurosci. 11:16. doi:10.3389/fncom.2017.00016
+
+.. _`Rudnicki M and Hemmert W (2017)`: http://journal.frontiersin.org/article/10.3389/fncom.2017.00016/abstract
 
 
 Acknowledgments

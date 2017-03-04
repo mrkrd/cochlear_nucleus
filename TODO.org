@@ -8,6 +8,10 @@
 * TODO Unit test with cn.nrn.GBC_Point()
 * DONE [#A] Update README and upload to GitHub
   CLOSED: [2017-03-03 Fri 17:15]
-* TODO Add a DOI
+* DONE Add a DOI
+  CLOSED: [2017-03-04 Sat 17:47]
+
+https://zenodo.org/badge/latestdoi/24233/mrkrd/cochlear_nucleus
+
 * DONE Acknowledgments
   CLOSED: [2017-03-03 Fri 20:32]
