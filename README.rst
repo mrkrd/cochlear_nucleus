@@ -17,9 +17,11 @@ Usage
 -----
 
 Look for examples in the examples_ directory (e.g. nrn_gbc_demo.py and
-nrn_gbc_demo_with_default_weights.py).
+nrn_gbc_demo_with_default_weights.py).  Note that some examples
+require cochlea_ to be installed.
 
 .. _examples: https://github.com/mrkrd/cochlear_nucleus/tree/master/examples
+.. _cochlea: https://github.com/mrkrd/cochlea
 
 
 Installation
