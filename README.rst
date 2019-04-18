@@ -1,9 +1,6 @@
 cochlear_nucleus
 ================
 
-.. image:: https://zenodo.org/badge/24233/mrkrd/cochlear_nucleus.svg
-   :target: https://zenodo.org/badge/latestdoi/24233/mrkrd/cochlear_nucleus
-
 A Python package implementing computational models of the `globular
 bushy cells`_ (GBCs) in the mammalian `ventral cochlear nucleus`_.
 Phenomenological models of endbulbs of Held with with short term
@@ -58,21 +55,28 @@ Install the package itself::
 Citing
 ------
 
-Please use our DOI when citing the models (click on the link for a
-full reference):
+Rudnicki M. and Hemmert W. (2017).  *High entrainment constrains
+synaptic depression levels of an in vivo globular bushy cell model*.
+Frontiers in Computational Neuroscience, Frontiers Media SA, 2017, 11,
+pp. 1-11.
+doi:10.3389/fncom.2017.00016
+https://www.frontiersin.org/articles/10.3389/fncom.2017.00016/full
 
-.. image:: https://zenodo.org/badge/24233/mrkrd/cochlear_nucleus.svg
-   :target: https://zenodo.org/badge/latestdoi/24233/mrkrd/cochlear_nucleus
+BibTeX entry::
 
+  @Article{Rudnicki2017,
+    author    = {Marek Rudnicki and Werner Hemmert},
+    title     = {High Entrainment Constrains Synaptic Depression Levels of an In vivo Globular Bushy Cell Model},
+    journal   = {Frontiers in Computational Neuroscience},
+    year      = {2017},
+    volume    = {11},
+    pages     = {1--11},
+    month     = {mar},
+    doi       = {10.3389/fncom.2017.00016},
+    publisher = {Frontiers Media {SA}},
+    url       = {https://www.frontiersin.org/articles/10.3389/fncom.2017.00016/full},
+  }
 
-We also published a manuscript with simulations of GBCs using this
-software:
-
-`Rudnicki M and Hemmert W (2017)`_. *High entrainment constrains
-synaptic depression levels of an in vivo globular bushy cell
-model*. Front. Comput. Neurosci. 11:16. doi:10.3389/fncom.2017.00016
-
-.. _`Rudnicki M and Hemmert W (2017)`: http://journal.frontiersin.org/article/10.3389/fncom.2017.00016/abstract
 
 
 Acknowledgments
