@@ -1,0 +1,80 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/marek/projects/cochlear_nucleus/TODO.org
+
+
+* DONE Move Brian models to cochlear_nucleus.brn name space
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:29
+  :ARCHIVE_FILE: ~/projects/cochlear_nucleus/TODO.org
+  :ARCHIVE_CATEGORY: TODO
+  :ARCHIVE_TODO: DONE
+  :END:
+
+<2015-11-06 Fri 12:12>
+
+
+Archived entries from file /home/marek/projects/cochlear_nucleus/TODO.org
+
+
+* DONE Cleanup/check calc_conductivity_cm2 and units
+  CLOSED: [2017-03-04 Sat 19:58]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:29
+  :ARCHIVE_FILE: ~/projects/cochlear_nucleus/TODO.org
+  :ARCHIVE_CATEGORY: TODO
+  :ARCHIVE_TODO: DONE
+  :END:
+
+
+Archived entries from file /home/marek/projects/cochlear_nucleus/TODO.org
+
+
+* CANCELED Unit test with cn.nrn.GBC_Point()
+  CLOSED: [2017-03-04 Sat 19:59]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:29
+  :ARCHIVE_FILE: ~/projects/cochlear_nucleus/TODO.org
+  :ARCHIVE_CATEGORY: TODO
+  :ARCHIVE_TODO: CANCELED
+  :END:
+
+Archived entries from file /home/marek/projects/cochlear_nucleus/TODO.org
+
+
+* DONE [#A] Update README and upload to GitHub
+  CLOSED: [2017-03-03 Fri 17:15]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:29
+  :ARCHIVE_FILE: ~/projects/cochlear_nucleus/TODO.org
+  :ARCHIVE_CATEGORY: TODO
+  :ARCHIVE_TODO: DONE
+  :END:
+
+Archived entries from file /home/marek/projects/cochlear_nucleus/TODO.org
+
+
+* DONE Add a DOI
+  CLOSED: [2017-03-04 Sat 17:47]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:29
+  :ARCHIVE_FILE: ~/projects/cochlear_nucleus/TODO.org
+  :ARCHIVE_CATEGORY: TODO
+  :ARCHIVE_TODO: DONE
+  :END:
+
+https://zenodo.org/badge/latestdoi/24233/mrkrd/cochlear_nucleus
+
+
+Archived entries from file /home/marek/projects/cochlear_nucleus/TODO.org
+
+
+* DONE Acknowledgments
+  CLOSED: [2017-03-03 Fri 20:32]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:29
+  :ARCHIVE_FILE: ~/projects/cochlear_nucleus/TODO.org
+  :ARCHIVE_CATEGORY: TODO
+  :ARCHIVE_TODO: DONE
+  :END:
